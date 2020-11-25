@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "141107307638",
+    "firebase_url": "https://localapparel-e87b2.firebaseio.com",
+    "project_id": "localapparel-e87b2",
+    "storage_bucket": "localapparel-e87b2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:141107307638:android:9a9973a1151b6ebb67ab57",
+        "android_client_info": {
+          "package_name": "cmsc436.semesterproject.localapparel"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "141107307638-pr39tdnepuklfdsb24je7crqkvav97st.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtW6WOSGE2-L_wKf2yLpkGwHK2li5B7ek"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "141107307638-pr39tdnepuklfdsb24je7crqkvav97st.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
