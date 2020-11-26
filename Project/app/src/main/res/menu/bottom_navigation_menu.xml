@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/browse"
+        android:enabled="true"
+        android:icon="@drawable/star"
+        android:title="Browse"/>
+    <item
+        android:id="@+id/add"
+        android:enabled="true"
+        android:icon="@drawable/star"
+        android:title="Add Listing"/>
+    <item
+        android:id="@+id/profile"
+        android:enabled="true"
+        android:icon="@drawable/star"
+        android:title="Profile"/>
+</menu>

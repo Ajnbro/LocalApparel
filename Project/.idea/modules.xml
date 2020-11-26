@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/LocalApparel.iml" filepath="$PROJECT_DIR$/.idea/modules/LocalApparel.iml" group="LocalApparel" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/LocalApparel-app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/LocalApparel-app.iml" group="LocalApparel/app" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Project-LocalApparel.iml" filepath="$PROJECT_DIR$/.idea/modules/Project-LocalApparel.iml" group="LocalApparel" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="LocalApparel/app" />
     </modules>
   </component>
