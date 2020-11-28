@@ -12,10 +12,12 @@ class ApparelItem {
     var itemDescription: String? = null
     var itemPrice: Float? = null
     var itemLocation : Location? = null
-    var sellDate: Date? = null
+    var listingPostDate: String? = null
+    var listingExpirationDate: String? = null
+    var userID: String? = null
 
     constructor(isForSale: Boolean?, isForRent: Boolean?, itemBitmap: Bitmap?, itemName: String?,
-                itemDescription: String?, itemPrice: Float?, itemLocation: Location?, sellDate: Date?) {
+                itemDescription: String?, itemPrice: Float?, itemLocation: Location?, listingPostDate: String?, listingExpirationDate: String?, userID: String?) {
         this.isForSale = isForSale
         this.isForRent = isForRent
         this.itemBitmap = itemBitmap
@@ -23,7 +25,9 @@ class ApparelItem {
         this.itemDescription = itemDescription
         this.itemPrice = itemPrice
         this.itemLocation = itemLocation
-        this.sellDate = sellDate
+        this.listingPostDate = listingPostDate
+        this.listingExpirationDate = listingExpirationDate
+        this.userID = userID
     }
 
 }

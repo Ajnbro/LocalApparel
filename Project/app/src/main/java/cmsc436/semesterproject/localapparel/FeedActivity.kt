@@ -1,6 +1,8 @@
 package cmsc436.semesterproject.localapparel
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -14,7 +16,7 @@ class FeedActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_feed)
         mNavBar = findViewById<View>(R.id.bottom_navigation) as BottomNavigationView
-        BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        mNavBar.setOnNavigationItemSelectedListener { item ->
             when(item.itemId) {
                 R.id.browse -> {
                     // Respond to navigation item 1 click
@@ -22,6 +24,8 @@ class FeedActivity : AppCompatActivity() {
                 }
                 R.id.add -> {
                     // Respond to navigation item 2 click
+                    val intent = Intent(this, AddItemActivity::class.java)
+                    startActivity(intent)
                     true
                 }
                 R.id.profile -> {
@@ -31,5 +35,9 @@ class FeedActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
+
+    companion object {
+        private val TAG = "LocalApparel-FeedActivity"
     }
 }
