@@ -58,6 +58,8 @@ class AddItemActivity : Activity() {
     private lateinit var storageListings: StorageReference
     private lateinit var locationManager: LocationManager
     private lateinit var mLocationListener: LocationListener
+    private var mAuth: FirebaseAuth? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +79,9 @@ class AddItemActivity : Activity() {
         mItemImage = findViewById<View>(R.id.itemImage) as ImageView
 
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        mAuth = FirebaseAuth.getInstance()
+
 
         // Set the default date
         setDefaultDate()
@@ -179,9 +184,9 @@ class AddItemActivity : Activity() {
                 listingPostDate,
                 listingExpirationDate,
                 userID,
-                key
+                key,
+                mAuth?.currentUser?.email
         )
-
         storageListings.child(key).putBytes(imageData)
         databaseListings.child(key).setValue(item, object : DatabaseReference.CompletionListener {
             override fun onComplete(firebaseError: DatabaseError?, ref: DatabaseReference) {

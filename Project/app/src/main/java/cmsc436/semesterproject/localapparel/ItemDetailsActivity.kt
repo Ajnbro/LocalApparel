@@ -1,35 +1,22 @@
 package cmsc436.semesterproject.localapparel
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.DatePickerDialog
-import android.app.Dialog
-import android.app.DialogFragment
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
-import android.net.Uri
-import android.os.Build
+import android.graphics.BitmapFactory
+import android.location.Address
+import android.location.Geocoder
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import android.widget.*
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import android.widget.CheckBox
+import android.widget.ImageView
+import android.widget.TextView
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import java.io.ByteArrayOutputStream
-import java.io.FileNotFoundException
-import java.io.IOException
 import java.util.*
 
 
@@ -48,8 +35,7 @@ class ItemDetailsActivity : Activity() {
     lateinit var mIsForRent: CheckBox
     lateinit var mExpiration: TextView
     lateinit var mLocation: TextView
-
-
+    lateinit var mUserEmail: TextView
 
     var databaseRefreshListingsListener: ValueEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -69,7 +55,24 @@ class ItemDetailsActivity : Activity() {
                         mExpiration.text = item!!.listingExpirationDate
                         mIsForSale.isChecked = item!!.isForSale as Boolean
                         mIsForRent.isChecked = item!!.isForRent as Boolean
-                        // NEED TO DO LOCATION AND IMAGE STILL
+                        mUserEmail.text = item!!.userEmail.toString()
+                        val geocoder = Geocoder(this@ItemDetailsActivity, Locale.getDefault())
+                        val addresses: List<Address> = geocoder.getFromLocation(item!!.itemLatitude as Double, item!!.itemLongitude as Double, 1)
+                        val cityName: String = addresses[0].getAddressLine(0)
+                        val arr = cityName.split(", ")
+                        mLocation.text = arr[1] + ", " + arr[2]
+                        val ONE_MEGABYTE = 1024 * 1024.toLong()
+                        storageListings = FirebaseStorage.getInstance().getReference("listings/" + item!!.itemID.toString())
+                        storageListings.getBytes(ONE_MEGABYTE)
+                            .addOnSuccessListener(OnSuccessListener<ByteArray?> {
+                                val bitmap = BitmapFactory.decodeByteArray(it, 0, it?.size as Int)
+                                mImage.setImageBitmap(bitmap)
+                            }).addOnFailureListener(OnFailureListener {
+                                // set to stub image
+                                val bitmap =  BitmapFactory.decodeResource(parent.resources,
+                                    R.drawable.stub)
+                                mImage.setImageBitmap(bitmap)
+                            })
                     }
                 }
             }
@@ -91,10 +94,12 @@ class ItemDetailsActivity : Activity() {
         mIsForRent = findViewById<View>(R.id.itemForSale) as CheckBox
         mExpiration = findViewById<View>(R.id.itemExpirationDate) as TextView
         mLocation = findViewById<View>(R.id.itemLocation) as TextView
+        mUserEmail = findViewById<View>(R.id.userEmail) as TextView
+
 
         databaseListings = FirebaseDatabase.getInstance().getReference("listings")
-        storageListings = FirebaseStorage.getInstance().getReference("listings")
         databaseListings.addListenerForSingleValueEvent(databaseRefreshListingsListener)
+
 
         mNavBar = findViewById<View>(R.id.bottom_navigation) as BottomNavigationView
         mNavBar.setOnNavigationItemSelectedListener { item ->

@@ -1,7 +1,5 @@
 package cmsc436.semesterproject.localapparel
 
-import android.location.Location
-
 data class ApparelItem(var isForSale: Boolean? = false,
                        var isForRent: Boolean? = false,
                        var itemName: String? = "",
@@ -12,4 +10,5 @@ data class ApparelItem(var isForSale: Boolean? = false,
                        var listingPostDate: String? = "",
                        var listingExpirationDate: String? = "",
                        var userID: String? = "",
-                       var itemID: String? = "")
+                       var itemID: String? = "",
+                       var userEmail: String? = "")
