@@ -21,8 +21,7 @@
         android:id="@+id/itemImageUpload"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/itemName"
-        android:layout_marginTop="50dp"
+        android:layout_below="@id/itemImage"
         android:text="ADD IMAGE"
         android:layout_alignLeft="@id/itemImage">
     </Button>
@@ -30,7 +29,7 @@
     <ImageView
         android:id="@+id/itemImage"
         android:layout_width="250dp"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:layout_marginTop="50dp"
         android:layout_below="@id/itemName">
     </ImageView>
@@ -90,7 +89,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_marginTop="50dp"
         android:layout_below="@id/itemExpirationDate"
         android:text="Choose date" />
 
@@ -99,7 +97,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_marginTop="50dp"
         android:layout_below="@id/date_picker_button"
         android:text="Add Listing!" />
 

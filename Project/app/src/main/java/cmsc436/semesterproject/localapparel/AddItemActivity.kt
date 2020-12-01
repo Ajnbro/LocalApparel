@@ -1,20 +1,37 @@
 package cmsc436.semesterproject.localapparel
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.DialogFragment
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.FirebaseError
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import java.io.ByteArrayOutputStream
+import java.io.FileNotFoundException
+import java.io.IOException
 import java.util.*
 
 
@@ -23,22 +40,33 @@ class AddItemActivity : Activity() {
     private var mDate: Date? = null
     private var mItemName: EditText? = null
     private var mImageUploadButton: Button? = null
+    private var mImageBitmap: Bitmap? = null
+    private var mItemImage: ImageView? = null
     private var mItemDescription: EditText? = null
     private var mItemPrice: EditText? = null
     private var mItemSaleCheckBox: CheckBox? = null
     private var mItemRentCheckBox: CheckBox? = null
     private var mItemExpirationDate: TextView? = null
+    private var mLastLocationReading: Location? = null
+
+    private val mMinTime: Long = 5000
+
+    private val mMinDistance = 1000.0f
 
     lateinit var mNavBar: BottomNavigationView
     private lateinit var databaseListings: DatabaseReference
+    private lateinit var storageListings: StorageReference
+    private lateinit var locationManager: LocationManager
+    private lateinit var mLocationListener: LocationListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.add_item)
 
         databaseListings = FirebaseDatabase.getInstance().getReference("listings")
+        storageListings = FirebaseStorage.getInstance().getReference("listings")
 
-
+        mLocationListener = makeLocationListener()
         mItemName = findViewById<View>(R.id.itemName) as EditText
         mImageUploadButton = findViewById<View>(R.id.itemImageUpload) as Button
         mItemDescription = findViewById<View>(R.id.itemDescription) as EditText
@@ -46,6 +74,9 @@ class AddItemActivity : Activity() {
         mItemSaleCheckBox = findViewById<View>(R.id.itemForSale) as CheckBox
         mItemRentCheckBox = findViewById<View>(R.id.itemForRent) as CheckBox
         mItemExpirationDate = findViewById<View>(R.id.itemExpirationDate) as TextView
+        mItemImage = findViewById<View>(R.id.itemImage) as ImageView
+
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         // Set the default date and time
 
@@ -80,6 +111,41 @@ class AddItemActivity : Activity() {
         submitButton.setOnClickListener {
             submitListing()
         }
+
+        mImageUploadButton!!.setOnClickListener { imageOnClick() }
+    }
+
+    private fun imageOnClick() {
+        startActivityForResult(Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GET_FROM_GALLERY)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (Build.VERSION.SDK_INT >= 23 &&
+            ContextCompat.checkSelfPermission(applicationContext, "android.permission.ACCESS_FINE_LOCATION") != PackageManager.PERMISSION_GRANTED
+            || ContextCompat.checkSelfPermission(applicationContext, "android.permission.ACCESS_COARSE_LOCATION") != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this@AddItemActivity, arrayOf("android.permission.ACCESS_FINE_LOCATION",
+                "android.permission.ACCESS_COARSE_LOCATION"),
+                MY_PERMISSIONS_LOCATION)
+        } else getLocationUpdates()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+        super.onActivityResult(requestCode, resultCode, data)
+        //Detects request codes
+        if (requestCode == GET_FROM_GALLERY && resultCode == RESULT_OK) {
+            val selectedImage: Uri? = data.data
+            try {
+                mImageBitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, selectedImage)
+                mItemImage?.setImageBitmap(mImageBitmap)
+            } catch (e: FileNotFoundException) {
+                // TODO Auto-generated catch block
+                e.printStackTrace()
+            } catch (e: IOException) {
+                // TODO Auto-generated catch block
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun submitListing() {
@@ -88,6 +154,10 @@ class AddItemActivity : Activity() {
         var itemName = mItemName!!.text.toString()
         var itemDescription = mItemDescription!!.text.toString()
         var itemPrice = mItemPrice!!.text.toString().toFloat() // MAYBE ADD A REGEX TO CATCH BAD INPUT
+
+        val baos = ByteArrayOutputStream()
+        mImageBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val imageData: ByteArray = baos.toByteArray()
 
         val c = Calendar.getInstance()
         val year = c.get(Calendar.YEAR)
@@ -100,19 +170,21 @@ class AddItemActivity : Activity() {
 
         var userID = FirebaseAuth.getInstance().currentUser!!.uid
 
+
         var item = ApparelItem(
             isForSale,
             isForRent,
             itemName,
             itemDescription,
             itemPrice,
-            null,
+            mLastLocationReading,
             listingPostDate,
             listingExpirationDate,
             userID
         )
 
         val key = databaseListings.push().key.toString()
+        storageListings.child(key).putBytes(imageData)
         databaseListings.child(key).setValue(item, object : DatabaseReference.CompletionListener {
             override fun onComplete(firebaseError: DatabaseError?, ref: DatabaseReference) {
                 if (firebaseError != null) {
@@ -180,6 +252,90 @@ class AddItemActivity : Activity() {
         newFragment.show(fragmentManager, "datePicker")
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            MY_PERMISSIONS_LOCATION -> {
+                var g = 0
+                Log.d(TAG, "Perm?: " + permissions.size + " -? " + grantResults.size)
+                for (perm in permissions) Log.d(TAG, "Perm: " + perm + " --> " + grantResults[g++])
+                if (grantResults.isNotEmpty()
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) getLocationUpdates() else {
+                    Log.i(TAG, "Permission was not granted to access location")
+                    finish()
+                }
+            }
+        }
+    }
+
+    private fun getLocationUpdates(){
+        try {
+            // TODO - Check NETWORK_PROVIDER and GPS_PROVIDER for an existing
+            // location reading.
+            // Only keep this last reading if it is fresh - less than 5 minutes old.
+            // Register for network location updates
+            var loc = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            if (loc != null && (System.currentTimeMillis() - loc.time) < FIVE_MINS) {
+                mLastLocationReading = loc;
+            }
+
+            loc = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (loc != null && (System.currentTimeMillis() - loc.time) < FIVE_MINS) {
+                mLastLocationReading = loc;
+            }
+
+            // TODO - register to receive location updates from NETWORK_PROVIDER
+            if (null != locationManager!!.getProvider(LocationManager.NETWORK_PROVIDER)) {
+                Log.i(TAG, "Network location updates requested")
+                locationManager!!.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    mMinTime,
+                    mMinDistance,
+                    mLocationListener
+                )
+            }
+
+            if (null != locationManager!!.getProvider(LocationManager.GPS_PROVIDER)) {
+                Log.i(TAG, "GPS location updates requested")
+                locationManager!!.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    mMinTime,
+                    mMinDistance,
+                    mLocationListener
+                )
+            }
+
+        } catch (e: SecurityException) {
+            Log.d(TAG, e.localizedMessage)
+        }
+    }
+
+
+    private fun makeLocationListener(): LocationListener {
+        return object : LocationListener {
+            override fun onLocationChanged(location: Location) {
+                if(mLastLocationReading == null) {
+                    mLastLocationReading = location
+                }
+                else if(mLastLocationReading!!.time < location.time) {
+                    mLastLocationReading = location
+                }
+            }
+
+            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
+                /* Not implemented */
+            }
+
+            override fun onProviderEnabled(provider: String) { /* Not implemented */
+            }
+
+            override fun onProviderDisabled(provider: String) { /* Not implemented */
+            }
+        }
+    }
+
+
+
     companion object {
 
         // 7 days in milliseconds - 7 * 24 * 60 * 60 * 1000
@@ -188,6 +344,14 @@ class AddItemActivity : Activity() {
         private val TAG = "LocalApparel"
 
         private var dateString: String? = null
+
+        private val GET_FROM_GALLERY = 3;
+
+        const val MY_PERMISSIONS_LOCATION = 4
+
+        private const val FIVE_MINS = 5 * 60 * 1000.toLong()
+
+
 
         private fun setDateString(year: Int, monthOfYear: Int, dayOfMonth: Int) {
             var monthOfYear = monthOfYear
