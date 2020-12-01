@@ -167,7 +167,6 @@ class AddItemActivity : Activity() {
 
         var userID = FirebaseAuth.getInstance().currentUser!!.uid
 
-
         var item = ApparelItem(
                 isForSale,
                 isForRent,
@@ -268,10 +267,6 @@ class AddItemActivity : Activity() {
 
     private fun getLocationUpdates(){
         try {
-            // TODO - Check NETWORK_PROVIDER and GPS_PROVIDER for an existing
-            // location reading.
-            // Only keep this last reading if it is fresh - less than 5 minutes old.
-            // Register for network location updates
             var loc = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (loc != null && (System.currentTimeMillis() - loc.time) < FIVE_MINS) {
                 mLastLocationReading = loc;
@@ -282,7 +277,6 @@ class AddItemActivity : Activity() {
                 mLastLocationReading = loc;
             }
 
-            // TODO - register to receive location updates from NETWORK_PROVIDER
             if (null != locationManager!!.getProvider(LocationManager.NETWORK_PROVIDER)) {
                 Log.i(TAG, "Network location updates requested")
                 locationManager!!.requestLocationUpdates(
@@ -320,26 +314,16 @@ class AddItemActivity : Activity() {
                 }
             }
 
-            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
-                /* Not implemented */
-            }
+            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
 
-            override fun onProviderEnabled(provider: String) { /* Not implemented */
-            }
+            override fun onProviderEnabled(provider: String) {}
 
-            override fun onProviderDisabled(provider: String) { /* Not implemented */
-            }
+            override fun onProviderDisabled(provider: String) {}
         }
     }
 
-
-
     companion object {
-
-        // 7 days in milliseconds - 7 * 24 * 60 * 60 * 1000
-        private val SEVEN_DAYS = 604800000
-
-        private val TAG = "LocalApparel"
+        private val TAG = "LocalApparel-AddItemActivity"
 
         private var dateString: String? = null
 
@@ -348,8 +332,6 @@ class AddItemActivity : Activity() {
         const val MY_PERMISSIONS_LOCATION = 4
 
         private const val FIVE_MINS = 5 * 60 * 1000.toLong()
-
-
 
         private fun setDateString(year: Int, monthOfYear: Int, dayOfMonth: Int) {
             var monthOfYear = monthOfYear

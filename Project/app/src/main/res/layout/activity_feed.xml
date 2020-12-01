@@ -7,10 +7,19 @@
     android:layout_height="match_parent"
     tools:context="cmsc436.semesterproject.localapparel.FeedActivity">
 
+    <TextView
+        android:id="@+id/distance_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Distance: ">
+    </TextView>
+
     <Spinner
         android:id="@+id/distances_spinner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="60dp"
+        android:layout_alignLeft="@id/distance_text"/>
 
     <ListView
         android:id="@+id/feed"

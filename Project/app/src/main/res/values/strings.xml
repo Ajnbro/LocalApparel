@@ -9,10 +9,10 @@
     <string name="password">Password</string>
     <string name="register">Register</string>
     <string-array name="distances_array">
-        <item>5</item>
-        <item>10</item>
-        <item>15</item>
-        <item>20</item>
-        <item>25</item>
+        <item>5 miles</item>
+        <item>10 miles</item>
+        <item>15 miles</item>
+        <item>20 miles</item>
+        <item>25 miles</item>
     </string-array>
 </resources>

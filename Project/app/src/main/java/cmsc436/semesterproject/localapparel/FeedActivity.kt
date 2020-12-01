@@ -1,6 +1,13 @@
 package cmsc436.semesterproject.localapparel
 
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.Location.distanceBetween
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -9,8 +16,9 @@ import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Spinner
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
@@ -26,6 +34,52 @@ class FeedActivity : AppCompatActivity() {
     lateinit var distancesSpinner: Spinner
     lateinit var listings: MutableList<ApparelItem>
 
+    // Location Variables
+    var mDistance: Float = 5f
+    private lateinit var locationManager: LocationManager
+    private lateinit var mLocationListener: LocationListener
+    private var mLastLocationReading: Location? = null
+    private val mMinTime: Long = 5000
+    private val mMinDistance = 1000.0f
+    var databaseRefreshListingsListener: ValueEventListener = object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            listings.clear()
+
+            var item: ApparelItem? = null
+            for (postSnapshot in dataSnapshot.children) {
+                try {
+                    item = postSnapshot.getValue(ApparelItem::class.java)
+                } catch (e: Exception) {
+                    Log.e(TAG, e.toString())
+                    return
+                } finally {
+                    var itemLat = item!!.itemLatitude as Double
+                    var itemLong = item!!.itemLongitude as Double
+                    var diff = FloatArray(1)
+                    distanceBetween(
+                        itemLat,
+                        itemLong,
+                        mLastLocationReading!!.latitude,
+                        mLastLocationReading!!.longitude,
+                        diff
+                    )
+
+                    var dist = diff[0] * 0.000621371192;
+
+                    if (dist <= mDistance) {
+                        listings.add(item!!)
+                    }
+                }
+            }
+
+            val itemListAdaptor = ItemList(this@FeedActivity, listings)
+            listViewListings.adapter = itemListAdaptor
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {}
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_feed)
@@ -33,11 +87,14 @@ class FeedActivity : AppCompatActivity() {
         databaseListings = FirebaseDatabase.getInstance().getReference("listings")
         storageListings = FirebaseStorage.getInstance().getReference("listings")
 
+        mLocationListener = makeLocationListener()
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
         listings = ArrayList()
         listViewListings = findViewById<View>(R.id.feed) as ListView
 
         listViewListings.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, i, l ->
-            val list = listings[i]
+            val listing = listings[i]
             //val intent = Intent(applicationContext, ItemDetailsActivity::class.java)
 
             //intent.putExtra(AUTHOR_ID, author.authorId)
@@ -62,15 +119,14 @@ class FeedActivity : AppCompatActivity() {
 
         distancesSpinner.setOnItemSelectedListener(object : OnItemSelectedListener {
             override fun onItemSelected(
-                arg0: AdapterView<*>?, arg1: View,
-                arg2: Int, arg3: Long
+                parent: AdapterView<*>, view: View?, pos: Int, id: Long
             ) {
-                Toast.makeText(this@FeedActivity, "You have clicked", Toast.LENGTH_SHORT).show()
+                mDistance = parent.getItemAtPosition(pos).toString().split(" ")[0].toFloat()
+                databaseListings.addListenerForSingleValueEvent(databaseRefreshListingsListener)
             }
 
-            override fun onNothingSelected(p0: AdapterView<*>?) {}
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         })
-
 
         mNavBar = findViewById<View>(R.id.bottom_navigation) as BottomNavigationView
         mNavBar.setOnNavigationItemSelectedListener { item ->
@@ -97,31 +153,108 @@ class FeedActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        databaseListings.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                listings.clear()
+        databaseListings.addValueEventListener(databaseRefreshListingsListener)
+    }
 
-                var item: ApparelItem? = null
-                for (postSnapshot in dataSnapshot.children) {
-                    try {
-                        item = postSnapshot.getValue(ApparelItem::class.java)
-                    } catch (e: Exception) {
-                        Log.e(TAG, e.toString())
-                        return
-                    } finally {
-                        listings.add(item!!)
-                    }
-                }
+    override fun onResume() {
+        super.onResume()
+        if (Build.VERSION.SDK_INT >= 23 &&
+            ContextCompat.checkSelfPermission(
+                applicationContext,
+                "android.permission.ACCESS_FINE_LOCATION"
+            ) != PackageManager.PERMISSION_GRANTED
+            || ContextCompat.checkSelfPermission(
+                applicationContext,
+                "android.permission.ACCESS_COARSE_LOCATION"
+            ) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this@FeedActivity, arrayOf(
+                    "android.permission.ACCESS_FINE_LOCATION",
+                    "android.permission.ACCESS_COARSE_LOCATION"
+                ),
+                MY_PERMISSIONS_LOCATION
+            )
+        } else getLocationUpdates()
+    }
 
-                val itemListAdaptor = ItemList(this@FeedActivity, listings)
-                listViewListings.adapter = itemListAdaptor
+    private fun getLocationUpdates(){
+        try {
+            var loc = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            if (loc != null && (System.currentTimeMillis() - loc.time) < FIVE_MINS) {
+                mLastLocationReading = loc;
             }
 
-            override fun onCancelled(databaseError: DatabaseError) {}
-        })
+            loc = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            if (loc != null && (System.currentTimeMillis() - loc.time) < FIVE_MINS) {
+                mLastLocationReading = loc;
+            }
+
+            if (null != locationManager!!.getProvider(LocationManager.NETWORK_PROVIDER)) {
+                Log.i(TAG, "Network location updates requested")
+                locationManager!!.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    mMinTime,
+                    mMinDistance,
+                    mLocationListener
+                )
+            }
+
+            if (null != locationManager!!.getProvider(LocationManager.GPS_PROVIDER)) {
+                Log.i(TAG, "GPS location updates requested")
+                locationManager!!.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    mMinTime,
+                    mMinDistance,
+                    mLocationListener
+                )
+            }
+
+        } catch (e: SecurityException) {
+            Log.d(TAG, e.localizedMessage)
+        }
+    }
+
+    private fun makeLocationListener(): LocationListener {
+        return object : LocationListener {
+            override fun onLocationChanged(location: Location) {
+                if(mLastLocationReading == null) {
+                    mLastLocationReading = location
+                }
+                else if(mLastLocationReading!!.time < location.time) {
+                    mLastLocationReading = location
+                }
+            }
+
+            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+
+            override fun onProviderEnabled(provider: String) {}
+
+            override fun onProviderDisabled(provider: String) {}
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
+        when (requestCode) {
+            MY_PERMISSIONS_LOCATION -> {
+                var g = 0
+                Log.d(TAG, "Perm?: " + permissions.size + " -? " + grantResults.size)
+                for (perm in permissions) Log.d(TAG, "Perm: " + perm + " --> " + grantResults[g++])
+                if (grantResults.isNotEmpty()
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                ) getLocationUpdates() else {
+                    Log.i(TAG, "Permission was not granted to access location")
+                    finish()
+                }
+            }
+        }
     }
 
     companion object {
         private val TAG = "LocalApparel-FeedActivity"
+        const val MY_PERMISSIONS_LOCATION = 4
+        private const val FIVE_MINS = 5 * 60 * 1000.toLong()
     }
 }
