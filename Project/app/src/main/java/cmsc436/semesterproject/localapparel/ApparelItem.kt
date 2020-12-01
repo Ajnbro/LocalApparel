@@ -11,4 +11,5 @@ data class ApparelItem(var isForSale: Boolean? = false,
                        var itemLongitude: Double? = 0.0,
                        var listingPostDate: String? = "",
                        var listingExpirationDate: String? = "",
-                       var userID: String? = "")
+                       var userID: String? = "",
+                       var itemID: String? = "")

@@ -23,6 +23,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class FeedActivity : AppCompatActivity() {
@@ -66,7 +69,14 @@ class FeedActivity : AppCompatActivity() {
 
                     var dist = diff[0] * 0.000621371192;
 
-                    if (dist <= mDistance) {
+                    /* TWEAK THIS TO WORK LATER ON
+                    val sdf = SimpleDateFormat("yyyy-MM-dd")
+                    val expiration: Date = sdf.parse(item!!.listingExpirationDate)
+                    val today = Date()
+                    if ((dist <= mDistance) && !Date(today!!.time + ONE_DAY).after(expiration)) {
+                        listings.add(item!!)
+                    } */
+                    if ((dist <= mDistance)) {
                         listings.add(item!!)
                     }
                 }
@@ -95,12 +105,10 @@ class FeedActivity : AppCompatActivity() {
 
         listViewListings.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, i, l ->
             val listing = listings[i]
-            //val intent = Intent(applicationContext, ItemDetailsActivity::class.java)
+            val intent = Intent(applicationContext, ItemDetailsActivity::class.java)
 
-            //intent.putExtra(AUTHOR_ID, author.authorId)
-            //intent.putExtra(AUTHOR_NAME, author.authorName)
-            //intent.putExtra(USER_ID, USER_ID)
-            //startActivity(intent)
+            intent.putExtra("ITEM ID", listing.itemID)
+            startActivity(intent)
         }
 
         distancesSpinner = findViewById<View>(R.id.distances_spinner) as Spinner
@@ -255,6 +263,7 @@ class FeedActivity : AppCompatActivity() {
     companion object {
         private val TAG = "LocalApparel-FeedActivity"
         const val MY_PERMISSIONS_LOCATION = 4
+        val ONE_DAY = 86400000
         private const val FIVE_MINS = 5 * 60 * 1000.toLong()
     }
 }

@@ -78,8 +78,8 @@ class AddItemActivity : Activity() {
 
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-        // Set the default date and time
-        setDefaultDateTime()
+        // Set the default date
+        setDefaultDate()
 
         val datePickerButton = findViewById<View>(R.id.date_picker_button) as Button
         datePickerButton.setOnClickListener { showDatePickerDialog() }
@@ -166,6 +166,7 @@ class AddItemActivity : Activity() {
         var listingExpirationDate = mItemExpirationDate!!.text.toString()
 
         var userID = FirebaseAuth.getInstance().currentUser!!.uid
+        val key = databaseListings.push().key.toString()
 
         var item = ApparelItem(
                 isForSale,
@@ -177,10 +178,10 @@ class AddItemActivity : Activity() {
                 mLastLocationReading!!.longitude,
                 listingPostDate,
                 listingExpirationDate,
-                userID
+                userID,
+                key
         )
 
-        val key = databaseListings.push().key.toString()
         storageListings.child(key).putBytes(imageData)
         databaseListings.child(key).setValue(item, object : DatabaseReference.CompletionListener {
             override fun onComplete(firebaseError: DatabaseError?, ref: DatabaseReference) {
@@ -199,16 +200,10 @@ class AddItemActivity : Activity() {
         })
     }
 
-
-    private fun setDefaultDateTime() {
-
-        // Default is current time + 7 days
+    private fun setDefaultDate() {
         mDate = Date()
-        mDate = Date(mDate!!.time)
 
         val c = Calendar.getInstance()
-        c.time = mDate
-
         setDateString(
             c.get(Calendar.YEAR), c.get(Calendar.MONTH),
             c.get(Calendar.DAY_OF_MONTH)
