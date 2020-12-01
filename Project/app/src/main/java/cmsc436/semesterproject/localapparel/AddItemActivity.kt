@@ -23,7 +23,6 @@ class AddItemActivity : Activity() {
     private var mDate: Date? = null
     private var mItemName: EditText? = null
     private var mImageUploadButton: Button? = null
-    private var mImageBitmap: Bitmap? = null
     private var mItemDescription: EditText? = null
     private var mItemPrice: EditText? = null
     private var mItemSaleCheckBox: CheckBox? = null
@@ -104,7 +103,6 @@ class AddItemActivity : Activity() {
         var item = ApparelItem(
             isForSale,
             isForRent,
-            null,
             itemName,
             itemDescription,
             itemPrice,

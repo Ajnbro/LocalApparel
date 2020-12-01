@@ -16,44 +16,8 @@
     <ImageView
         android:id="@+id/itemImage"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:src="@drawable/missing_image">
     </ImageView>
-
-    <TextView
-        android:id="@+id/itemDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </TextView>
-
-    <!-- THIS WILL BE EITHER FOR SALE, FOR RENT, OR BOTH-->
-    <TextView
-        android:id="@+id/itemStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </TextView>
-
-    <TextView
-        android:id="@+id/itemPrice"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </TextView>
-
-    <TextView
-        android:id="@+id/itemLocation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </TextView>
-
-    <TextView
-        android:id="@+id/itemPostingDate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </TextView>
-
-    <TextView
-        android:id="@+id/itemExpirationDate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </TextView>
 
 </RelativeLayout>
