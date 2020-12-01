@@ -29,4 +29,14 @@ class Validators {
         }
         return false
     }
+
+    fun validPrice(price: String?) : Boolean {
+        if (price.isNullOrEmpty()) {
+            return false
+        }
+
+        val priceRegex = Regex("[+]?([0-9]*[.])?[0-9]+")
+
+        return price.matches(priceRegex);
+    }
 }

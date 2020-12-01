@@ -79,7 +79,6 @@ class AddItemActivity : Activity() {
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         // Set the default date and time
-
         setDefaultDateTime()
 
         val datePickerButton = findViewById<View>(R.id.date_picker_button) as Button
@@ -139,10 +138,8 @@ class AddItemActivity : Activity() {
                 mImageBitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, selectedImage)
                 mItemImage?.setImageBitmap(mImageBitmap)
             } catch (e: FileNotFoundException) {
-                // TODO Auto-generated catch block
                 e.printStackTrace()
             } catch (e: IOException) {
-                // TODO Auto-generated catch block
                 e.printStackTrace()
             }
         }
@@ -153,7 +150,7 @@ class AddItemActivity : Activity() {
         var isForRent = mItemRentCheckBox!!.isChecked
         var itemName = mItemName!!.text.toString()
         var itemDescription = mItemDescription!!.text.toString()
-        var itemPrice = mItemPrice!!.text.toString().toFloat() // MAYBE ADD A REGEX TO CATCH BAD INPUT
+        var itemPrice = mItemPrice!!.text.toString().toDouble() // MAYBE ADD A REGEX TO CATCH BAD INPUT
 
         val baos = ByteArrayOutputStream()
         mImageBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, baos)
@@ -172,15 +169,16 @@ class AddItemActivity : Activity() {
 
 
         var item = ApparelItem(
-            isForSale,
-            isForRent,
-            itemName,
-            itemDescription,
-            itemPrice,
-            mLastLocationReading,
-            listingPostDate,
-            listingExpirationDate,
-            userID
+                isForSale,
+                isForRent,
+                itemName,
+                itemDescription,
+                itemPrice,
+                mLastLocationReading!!.latitude,
+                mLastLocationReading!!.longitude,
+                listingPostDate,
+                listingExpirationDate,
+                userID
         )
 
         val key = databaseListings.push().key.toString()

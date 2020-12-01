@@ -3,41 +3,38 @@ package cmsc436.semesterproject.localapparel
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
-import android.widget.Button
+import android.widget.AdapterView.OnItemSelectedListener
+import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.Spinner
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 
 
 class FeedActivity : AppCompatActivity() {
 
     lateinit var mNavBar: BottomNavigationView
-    //private lateinit var mLayoutInflater: LayoutInflater
-    lateinit var mRefreshButton: Button
     private lateinit var databaseListings: DatabaseReference
-    internal lateinit var listViewListings: ListView
-    internal lateinit var listings: MutableList<ApparelItem>
+    private lateinit var storageListings: StorageReference
+    lateinit var listViewListings: ListView
+    lateinit var distancesSpinner: Spinner
+    lateinit var listings: MutableList<ApparelItem>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_feed)
 
         databaseListings = FirebaseDatabase.getInstance().getReference("listings")
-        //mLayoutInflater = LayoutInflater.from(this)
+        storageListings = FirebaseStorage.getInstance().getReference("listings")
 
         listings = ArrayList()
         listViewListings = findViewById<View>(R.id.feed) as ListView
-
-        loadItems()
-
-        mRefreshButton = findViewById<View>(R.id.refresh_button) as Button
-        mRefreshButton.setOnClickListener {
-            loadItems()
-        }
 
         listViewListings.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, i, l ->
             val list = listings[i]
@@ -48,6 +45,32 @@ class FeedActivity : AppCompatActivity() {
             //intent.putExtra(USER_ID, USER_ID)
             //startActivity(intent)
         }
+
+        distancesSpinner = findViewById<View>(R.id.distances_spinner) as Spinner
+
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter.createFromResource(
+            this,
+            R.array.distances_array,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            // Specify the layout to use when the list of choices appears
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            // Apply the adapter to the spinner
+            distancesSpinner.adapter = adapter
+        }
+
+        distancesSpinner.setOnItemSelectedListener(object : OnItemSelectedListener {
+            override fun onItemSelected(
+                arg0: AdapterView<*>?, arg1: View,
+                arg2: Int, arg3: Long
+            ) {
+                Toast.makeText(this@FeedActivity, "You have clicked", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        })
+
 
         mNavBar = findViewById<View>(R.id.bottom_navigation) as BottomNavigationView
         mNavBar.setOnNavigationItemSelectedListener { item ->
@@ -71,11 +94,6 @@ class FeedActivity : AppCompatActivity() {
         }
     }
 
-    public override fun onResume() {
-        super.onResume()
-        loadItems()
-    }
-
     override fun onStart() {
         super.onStart()
 
@@ -89,27 +107,18 @@ class FeedActivity : AppCompatActivity() {
                         item = postSnapshot.getValue(ApparelItem::class.java)
                     } catch (e: Exception) {
                         Log.e(TAG, e.toString())
+                        return
                     } finally {
                         listings.add(item!!)
                     }
                 }
+
                 val itemListAdaptor = ItemList(this@FeedActivity, listings)
                 listViewListings.adapter = itemListAdaptor
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
         })
-    }
-
-
-
-
-    private fun loadItems() {
-        // Sort based on locations or other specified filters and then add everything
-        //for (){
-        //}
-
-        Log.i(TAG, "Loaded items for the feed")
     }
 
     companion object {
