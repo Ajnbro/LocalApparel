@@ -23,9 +23,7 @@ import java.util.*
 class ItemDetailsActivity : Activity() {
 
     lateinit var mNavBar: BottomNavigationView
-    private lateinit var databaseListings: DatabaseReference
-    private lateinit var storageListings: StorageReference
-    var listing: ApparelItem? = null
+
     var itemID: String? = null
     lateinit var mName: TextView
     lateinit var mImage: ImageView
@@ -37,6 +35,9 @@ class ItemDetailsActivity : Activity() {
     lateinit var mLocation: TextView
     lateinit var mUserEmail: TextView
 
+    // Firebase
+    private lateinit var databaseListings: DatabaseReference
+    private lateinit var storageListings: StorageReference
     var databaseRefreshListingsListener: ValueEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             var item: ApparelItem? = null
@@ -50,7 +51,7 @@ class ItemDetailsActivity : Activity() {
                     if (item!!.itemID == itemID) {
                         mName.text = item!!.itemName
                         mDescription.text = item!!.itemDescription
-                        mPrice.text = item!!.itemPrice.toString()
+                        mPrice.text = "$" + item!!.itemPrice.toString()
                         mExpiration.text = item!!.listingExpirationDate
                         mIsForSale.isChecked = item!!.isForSale as Boolean
                         mIsForRent.isChecked = item!!.isForRent as Boolean
@@ -67,10 +68,7 @@ class ItemDetailsActivity : Activity() {
                                 val bitmap = BitmapFactory.decodeByteArray(it, 0, it?.size as Int)
                                 mImage.setImageBitmap(bitmap)
                             }).addOnFailureListener(OnFailureListener {
-                                // set to stub image
-                                val bitmap =  BitmapFactory.decodeResource(parent.resources,
-                                    R.drawable.stub)
-                                mImage.setImageBitmap(bitmap)
+                                // Potentially do something
                             })
                     }
                 }
@@ -90,15 +88,13 @@ class ItemDetailsActivity : Activity() {
         mDescription = findViewById<View>(R.id.itemDescription) as TextView
         mPrice = findViewById<View>(R.id.itemPrice) as TextView
         mIsForSale = findViewById<View>(R.id.itemForSale) as CheckBox
-        mIsForRent = findViewById<View>(R.id.itemForSale) as CheckBox
+        mIsForRent = findViewById<View>(R.id.itemForRent) as CheckBox
         mExpiration = findViewById<View>(R.id.itemExpirationDate) as TextView
         mLocation = findViewById<View>(R.id.itemLocation) as TextView
         mUserEmail = findViewById<View>(R.id.userEmail) as TextView
 
-
         databaseListings = FirebaseDatabase.getInstance().getReference("listings")
         databaseListings.addListenerForSingleValueEvent(databaseRefreshListingsListener)
-
 
         mNavBar = findViewById<View>(R.id.bottom_navigation) as BottomNavigationView
         mNavBar.setOnNavigationItemSelectedListener { item ->

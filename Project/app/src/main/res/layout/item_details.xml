@@ -11,26 +11,34 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="50dp"
-        android:background="@drawable/border"
+        android:layout_marginTop="5dp"
         android:textAppearance="?android:attr/textAppearanceLarge" >
     </TextView>
 
     <ImageView
         android:id="@+id/itemImage"
         android:layout_width="250dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="50dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="5dp"
+        android:layout_centerInParent="true"
         android:layout_below="@id/itemName">
     </ImageView>
+
+    <TextView
+        android:id="@+id/desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Item Description:"
+        android:textColor="@color/colorBlack"
+        android:layout_below="@id/itemImage">
+    </TextView>
 
     <TextView
         android:id="@+id/itemDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:background="@drawable/border"
-        android:layout_below="@id/itemImage">
+        android:layout_below="@id/desc">
     </TextView>
 
     <CheckBox
@@ -38,7 +46,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="100dp"
+        android:textColor="@color/colorBlack"
         android:text="For Sale"
         android:enabled="false"
         android:layout_below="@id/itemDescription">
@@ -48,47 +58,84 @@
         android:id="@+id/itemForRent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/colorBlack"
         android:layout_alignParentRight="true"
+        android:layout_marginRight="100dp"
         android:text="For Rent"
         android:enabled="false"
         android:layout_below="@id/itemDescription">
     </CheckBox>
 
     <TextView
+        android:id="@+id/price"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Price: "
+        android:textColor="@color/colorBlack"
+        android:layout_below="@id/itemForSale">
+    </TextView>
+
+    <TextView
         android:id="@+id/itemPrice"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:background="@drawable/border"
-        android:layout_below="@id/itemForSale">
+        android:layout_below="@id/price">
+    </TextView>
+
+    <TextView
+        android:id="@+id/expiration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/colorBlack"
+        android:text="Item Expiration Date:"
+        android:layout_below="@id/itemPrice">
     </TextView>
 
     <TextView
         android:id="@+id/itemExpirationDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:text="Item Expiration Date"
-        android:layout_below="@id/itemPrice">
+        android:text=""
+        android:layout_below="@id/expiration">
+    </TextView>
+
+    <TextView
+        android:id="@+id/sellerLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/colorBlack"
+        android:text="Seller Location:"
+        android:layout_below="@id/itemExpirationDate">
     </TextView>
 
     <TextView
         android:id="@+id/itemLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:text="Item Location"
-        android:layout_below="@id/itemExpirationDate">
+        android:text=""
+        android:layout_below="@id/sellerLocation">
+    </TextView>
+
+    <TextView
+        android:id="@+id/sellerContactInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorBlack"
+        android:layout_marginTop="5dp"
+        android:text="Seller Contact Information:"
+        android:layout_below="@id/itemLocation">
     </TextView>
 
     <TextView
         android:id="@+id/userEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:text="User Email"
-        android:layout_below="@id/itemLocation">
+        android:text=""
+        android:layout_below="@id/sellerContactInfo">
     </TextView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView

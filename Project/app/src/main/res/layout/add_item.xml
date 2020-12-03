@@ -3,54 +3,77 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="Item Name: "
+        android:textColor="@color/colorBlack">
+    </TextView>
 
     <EditText
         android:id="@+id/itemName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="50dp"
         android:background="@drawable/border"
-        android:hint="Item Name"
-        android:textAppearance="?android:attr/textAppearanceLarge" >
+        android:paddingLeft="2dp"
+        android:singleLine="true"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_below="@id/title">
     </EditText>
+
+    <ImageView
+        android:id="@+id/itemImage"
+        android:layout_width="225dp"
+        android:layout_height="175dp"
+        android:layout_marginTop="5dp"
+        android:layout_centerInParent="true"
+        android:layout_below="@id/itemName">
+    </ImageView>
 
     <Button
         android:id="@+id/itemImageUpload"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/itemImage"
         android:text="ADD IMAGE"
-        android:layout_alignLeft="@id/itemImage">
+        android:layout_centerInParent="true"
+        android:layout_below="@id/itemImage">
     </Button>
 
-    <ImageView
-        android:id="@+id/itemImage"
-        android:layout_width="250dp"
-        android:layout_height="100dp"
-        android:layout_marginTop="50dp"
-        android:layout_below="@id/itemName">
-    </ImageView>
+    <TextView
+        android:id="@+id/desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Item Description:"
+        android:textColor="@color/colorBlack"
+        android:layout_below="@id/itemImageUpload">
+    </TextView>
 
     <EditText
         android:id="@+id/itemDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
         android:background="@drawable/border"
-        android:hint="Item Description"
-        android:layout_below="@id/itemImage">
+        android:inputType="textMultiLine"
+        android:paddingLeft="2dp"
+        android:layout_below="@id/desc">
     </EditText>
 
-    <!-- THERE IS WHERE YOU SELECT FOR SALE, FOR RENT, OR BOTH -->
     <CheckBox
         android:id="@+id/itemForSale"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="100dp"
+        android:textColor="@color/colorBlack"
         android:text="For Sale"
         android:layout_below="@id/itemDescription">
     </CheckBox>
@@ -59,29 +82,49 @@
         android:id="@+id/itemForRent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/colorBlack"
         android:layout_alignParentRight="true"
+        android:layout_marginRight="100dp"
         android:text="For Rent"
         android:layout_below="@id/itemDescription">
     </CheckBox>
 
-    <EditText
-        android:id="@+id/itemPrice"
+    <TextView
+        android:id="@+id/price"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="5dp"
+        android:text="Price: "
+        android:textColor="@color/colorBlack"
+        android:layout_below="@id/itemForRent">
+    </TextView>
+
+    <EditText
+        android:id="@+id/itemPrice"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/border"
-        android:hint="Item Price"
-        android:layout_below="@id/itemForSale">
+        android:paddingLeft="2dp"
+        android:layout_below="@id/price">
     </EditText>
+
+    <TextView
+        android:id="@+id/expiration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/colorBlack"
+        android:text="Item Expiration Date:"
+        android:layout_below="@id/itemPrice">
+    </TextView>
 
     <TextView
         android:id="@+id/itemExpirationDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:text="Item Expiration Date"
-        android:layout_below="@id/itemPrice">
+        android:text=""
+        android:layout_below="@id/expiration">
     </TextView>
 
     <Button
@@ -89,6 +132,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:layout_marginTop="5dp"
         android:layout_below="@id/itemExpirationDate"
         android:text="Choose date" />
 
@@ -96,7 +140,8 @@
         android:id="@+id/submitButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_marginTop="5dp"
+        android:layout_centerInParent="true"
         android:layout_below="@id/date_picker_button"
         android:text="Add Listing!" />
 

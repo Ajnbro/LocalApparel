@@ -14,18 +14,17 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
-import android.widget.ListView
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.ArrayList
 
 
 class FeedActivity : AppCompatActivity() {
@@ -33,7 +32,7 @@ class FeedActivity : AppCompatActivity() {
     lateinit var mNavBar: BottomNavigationView
     private lateinit var databaseListings: DatabaseReference
     private lateinit var storageListings: StorageReference
-    lateinit var listViewListings: ListView
+    lateinit var listingsRecyclerView: RecyclerView
     lateinit var distancesSpinner: Spinner
     lateinit var listings: MutableList<ApparelItem>
 
@@ -44,6 +43,7 @@ class FeedActivity : AppCompatActivity() {
     private var mLastLocationReading: Location? = null
     private val mMinTime: Long = 5000
     private val mMinDistance = 1000.0f
+
     var databaseRefreshListingsListener: ValueEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             listings.clear()
@@ -82,8 +82,11 @@ class FeedActivity : AppCompatActivity() {
                 }
             }
 
-            val itemListAdaptor = ItemList(this@FeedActivity, listings)
-            listViewListings.adapter = itemListAdaptor
+            listingsRecyclerView.adapter = ItemRecyclerViewAdapter(
+                this@FeedActivity,
+                listings,
+                R.layout.apparel_item
+            )
         }
 
         override fun onCancelled(databaseError: DatabaseError) {}
@@ -101,15 +104,18 @@ class FeedActivity : AppCompatActivity() {
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         listings = ArrayList()
-        listViewListings = findViewById<View>(R.id.feed) as ListView
+        listingsRecyclerView = findViewById<View>(R.id.feed) as RecyclerView
+        listingsRecyclerView.layoutManager = LinearLayoutManager(this)
 
-        listViewListings.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, i, l ->
-            val listing = listings[i]
-            val intent = Intent(applicationContext, ItemDetailsActivity::class.java)
+        var dividerItemDecoration = DividerItemDecoration(
+            applicationContext,
+            LinearLayoutManager.VERTICAL
+        )
+        dividerItemDecoration.setDrawable(
+            applicationContext.resources.getDrawable(R.drawable.recycler_view_line)
+        );
 
-            intent.putExtra("ITEM ID", listing.itemID)
-            startActivity(intent)
-        }
+        listingsRecyclerView.addItemDecoration(dividerItemDecoration)
 
         distancesSpinner = findViewById<View>(R.id.distances_spinner) as Spinner
 
