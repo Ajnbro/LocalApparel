@@ -39,7 +39,6 @@ class ItemDetailsActivity : Activity() {
 
     var databaseRefreshListingsListener: ValueEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
-            Log.i(TAG, "Hits onDataChange()")
             var item: ApparelItem? = null
             for (postSnapshot in dataSnapshot.children) {
                 try {

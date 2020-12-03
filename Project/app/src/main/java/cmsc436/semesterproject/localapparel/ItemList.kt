@@ -24,9 +24,11 @@ class ItemList(private val context: Activity, private var items: List<ApparelIte
 
         val itemName = listViewItem.findViewById<View>(R.id.itemName) as TextView
         val imageView = listViewItem.findViewById<View>(R.id.itemImage) as ImageView
+        val itemPrice = listViewItem.findViewById<View>(R.id.itemPrice) as TextView
 
         val item = items[position]
         itemName.text = item.itemName
+        itemPrice.text = "$" + item.itemPrice
         // SET IMAGE HERE
         val ONE_MEGABYTE = 1024 * 1024.toLong()
         val storageListings = FirebaseStorage.getInstance().getReference("listings/" + item!!.itemID.toString())

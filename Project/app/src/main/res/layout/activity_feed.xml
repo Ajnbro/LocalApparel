@@ -26,7 +26,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/bottom_navigation"
-        android:layout_below="@id/distances_spinner"/>
+        android:layout_below="@id/distances_spinner"
+        android:layout_margin="4dp"
+        android:divider="@color/colorBlack"
+        android:dividerHeight="1dp"/>
+
+
+
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"

@@ -2,16 +2,16 @@
     <item
         android:id="@+id/browse"
         android:enabled="true"
-        android:icon="@drawable/star"
+        android:icon="@drawable/search"
         android:title="Browse"/>
     <item
         android:id="@+id/add"
         android:enabled="true"
-        android:icon="@drawable/star"
+        android:icon="@drawable/add"
         android:title="Add Listing"/>
     <item
         android:id="@+id/profile"
         android:enabled="true"
-        android:icon="@drawable/star"
-        android:title="Profile"/>
+        android:icon="@drawable/feed"
+        android:title="Your Listings"/>
 </menu>

@@ -1,7 +1,5 @@
 package cmsc436.semesterproject.localapparel
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.Dialog
@@ -10,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -187,7 +186,19 @@ class AddItemActivity : Activity() {
                 key,
                 mAuth?.currentUser?.email
         )
-        storageListings.child(key).putBytes(imageData)
+        if(mImageBitmap == null) {
+            val icon: Bitmap = BitmapFactory.decodeResource(
+                applicationContext.resources,
+                R.drawable.stub
+            )
+            val baos = ByteArrayOutputStream()
+            icon?.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+            val stubImage: ByteArray = baos.toByteArray()
+            storageListings.child(key).putBytes(stubImage)
+        }
+        else {
+            storageListings.child(key).putBytes(imageData)
+        }
         databaseListings.child(key).setValue(item, object : DatabaseReference.CompletionListener {
             override fun onComplete(firebaseError: DatabaseError?, ref: DatabaseReference) {
                 if (firebaseError != null) {
