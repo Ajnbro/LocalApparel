@@ -16,11 +16,14 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.cottacush.android.currencyedittext.CurrencyEditText
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseError
@@ -31,6 +34,7 @@ import com.google.firebase.storage.StorageReference
 import java.io.ByteArrayOutputStream
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.text.DecimalFormat
 import java.util.*
 
 
@@ -42,14 +46,13 @@ class AddItemActivity : Activity() {
     private var mImageBitmap: Bitmap? = null
     private var mItemImage: ImageView? = null
     private var mItemDescription: EditText? = null
-    private var mItemPrice: EditText? = null
+    private var mItemPrice: CurrencyEditText? = null
     private var mItemSaleCheckBox: CheckBox? = null
     private var mItemRentCheckBox: CheckBox? = null
     private var mItemExpirationDate: TextView? = null
     private var mLastLocationReading: Location? = null
 
     private val mMinTime: Long = 5000
-
     private val mMinDistance = 1000.0f
 
     lateinit var mNavBar: BottomNavigationView
@@ -58,8 +61,7 @@ class AddItemActivity : Activity() {
     private lateinit var locationManager: LocationManager
     private lateinit var mLocationListener: LocationListener
     private var mAuth: FirebaseAuth? = null
-
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.add_item)
@@ -71,7 +73,7 @@ class AddItemActivity : Activity() {
         mItemName = findViewById<View>(R.id.itemName) as EditText
         mImageUploadButton = findViewById<View>(R.id.itemImageUpload) as Button
         mItemDescription = findViewById<View>(R.id.itemDescription) as EditText
-        mItemPrice = findViewById<View>(R.id.itemPrice) as EditText
+        mItemPrice = findViewById<View>(R.id.itemPrice) as CurrencyEditText
         mItemSaleCheckBox = findViewById<View>(R.id.itemForSale) as CheckBox
         mItemRentCheckBox = findViewById<View>(R.id.itemForRent) as CheckBox
         mItemExpirationDate = findViewById<View>(R.id.itemExpirationDate) as TextView
@@ -80,7 +82,6 @@ class AddItemActivity : Activity() {
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         mAuth = FirebaseAuth.getInstance()
-
 
         // Set the default date
         setDefaultDate()
@@ -119,17 +120,32 @@ class AddItemActivity : Activity() {
     }
 
     private fun imageOnClick() {
-        startActivityForResult(Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GET_FROM_GALLERY)
+        startActivityForResult(
+            Intent(
+                Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI
+            ), GET_FROM_GALLERY
+        )
     }
 
     override fun onResume() {
         super.onResume()
         if (Build.VERSION.SDK_INT >= 23 &&
-            ContextCompat.checkSelfPermission(applicationContext, "android.permission.ACCESS_FINE_LOCATION") != PackageManager.PERMISSION_GRANTED
-            || ContextCompat.checkSelfPermission(applicationContext, "android.permission.ACCESS_COARSE_LOCATION") != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this@AddItemActivity, arrayOf("android.permission.ACCESS_FINE_LOCATION",
-                "android.permission.ACCESS_COARSE_LOCATION"),
-                MY_PERMISSIONS_LOCATION)
+            ContextCompat.checkSelfPermission(
+                applicationContext,
+                "android.permission.ACCESS_FINE_LOCATION"
+            ) != PackageManager.PERMISSION_GRANTED
+            || ContextCompat.checkSelfPermission(
+                applicationContext,
+                "android.permission.ACCESS_COARSE_LOCATION"
+            ) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this@AddItemActivity, arrayOf(
+                    "android.permission.ACCESS_FINE_LOCATION",
+                    "android.permission.ACCESS_COARSE_LOCATION"
+                ),
+                MY_PERMISSIONS_LOCATION
+            )
         } else getLocationUpdates()
     }
 
@@ -139,7 +155,10 @@ class AddItemActivity : Activity() {
         if (requestCode == GET_FROM_GALLERY && resultCode == RESULT_OK) {
             val selectedImage: Uri? = data.data
             try {
-                mImageBitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, selectedImage)
+                mImageBitmap = MediaStore.Images.Media.getBitmap(
+                    this.contentResolver,
+                    selectedImage
+                )
                 mItemImage?.setImageBitmap(mImageBitmap)
             } catch (e: FileNotFoundException) {
                 e.printStackTrace()
@@ -150,12 +169,49 @@ class AddItemActivity : Activity() {
     }
 
     private fun submitListing() {
+        var itemName = mItemName!!.text.toString()
+        if (itemName.equals("")) {
+            Toast.makeText(
+                applicationContext,
+                "Error posting listing! The item name must be specified.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        var itemDescription = mItemDescription!!.text.toString()
+        if (itemDescription.equals("")) {
+            Toast.makeText(
+                applicationContext,
+                "Error posting listing! The item description must be specified.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
         var isForSale = mItemSaleCheckBox!!.isChecked
         var isForRent = mItemRentCheckBox!!.isChecked
-        var itemName = mItemName!!.text.toString()
-        var itemDescription = mItemDescription!!.text.toString()
-        var itemPrice = mItemPrice!!.text.toString().toDouble() // MAYBE ADD A REGEX TO CATCH BAD INPUT
 
+        if (!(isForSale || isForRent)) {
+            Toast.makeText(
+                applicationContext,
+                "Error posting listing! The item must be listed for sale or for rent at least.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        var itemPrice = mItemPrice!!.getNumericValue()
+        if (itemPrice == null) {
+            Toast.makeText(
+                applicationContext,
+                "Error posting listing! A non-zero price must be specified.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        // TODO ENSURE THAT AN IMAGE IS PASSED
         val baos = ByteArrayOutputStream()
         mImageBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val imageData: ByteArray = baos.toByteArray()
@@ -167,24 +223,25 @@ class AddItemActivity : Activity() {
         setDateString(year, month, day)
         var listingPostDate = dateString
 
+        // TODO ENSURE THAT THE SPECIFIED DATE HAS NOT ALREADY EXPIRED
         var listingExpirationDate = mItemExpirationDate!!.text.toString()
 
         var userID = FirebaseAuth.getInstance().currentUser!!.uid
         val key = databaseListings.push().key.toString()
 
         var item = ApparelItem(
-                isForSale,
-                isForRent,
-                itemName,
-                itemDescription,
-                itemPrice,
-                mLastLocationReading!!.latitude,
-                mLastLocationReading!!.longitude,
-                listingPostDate,
-                listingExpirationDate,
-                userID,
-                key,
-                mAuth?.currentUser?.email
+            isForSale,
+            isForRent,
+            itemName,
+            itemDescription,
+            itemPrice,
+            mLastLocationReading!!.latitude,
+            mLastLocationReading!!.longitude,
+            listingPostDate,
+            listingExpirationDate,
+            userID,
+            key,
+            mAuth?.currentUser?.email
         )
         if(mImageBitmap == null) {
             val icon: Bitmap = BitmapFactory.decodeResource(
@@ -208,7 +265,11 @@ class AddItemActivity : Activity() {
                         Toast.LENGTH_LONG
                     ).show()
                 } else {
-                    Toast.makeText(applicationContext, "Listing successfully uploaded!", Toast.LENGTH_LONG)
+                    Toast.makeText(
+                        applicationContext,
+                        "Listing successfully uploaded!",
+                        Toast.LENGTH_LONG
+                    )
                         .show()
                     finish()
                 }
@@ -260,15 +321,18 @@ class AddItemActivity : Activity() {
         newFragment.show(fragmentManager, "datePicker")
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
         when (requestCode) {
             MY_PERMISSIONS_LOCATION -> {
                 var g = 0
                 Log.d(TAG, "Perm?: " + permissions.size + " -? " + grantResults.size)
                 for (perm in permissions) Log.d(TAG, "Perm: " + perm + " --> " + grantResults[g++])
                 if (grantResults.isNotEmpty()
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) getLocationUpdates() else {
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                ) getLocationUpdates() else {
                     Log.i(TAG, "Permission was not granted to access location")
                     finish()
                 }
