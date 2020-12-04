@@ -14,6 +14,7 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
+// CITATION: Based upon UIRecyclerView
 internal class ItemRecyclerViewAdapter(
     private val context: Activity,
     private val mItems: MutableList<ApparelItem>,

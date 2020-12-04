@@ -20,7 +20,7 @@
         android:layout_width="140dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="60dp"
-        android:layout_alignLeft="@id/distance_text"/>
+        android:layout_alignLeft="@id/distance_text" />
 
     <androidx.recyclerview.widget.RecyclerView
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -33,6 +33,7 @@
         android:divider="@color/colorBlack"
         android:dividerHeight="1dp" />
 
+    <!-- Component Citation: https://material.io/develop/android/components/bottom-navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"

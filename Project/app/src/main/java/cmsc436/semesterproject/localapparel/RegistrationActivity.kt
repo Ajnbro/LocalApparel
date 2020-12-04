@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 
+// CITATION: Lab7 modified
 class RegistrationActivity : AppCompatActivity() {
 
     private var emailTV: EditText? = null
@@ -41,10 +42,12 @@ class RegistrationActivity : AppCompatActivity() {
 
         if (!validator.validEmail(email)) {
             Toast.makeText(applicationContext, "Please enter a valid email...", Toast.LENGTH_LONG).show()
+            progressBar!!.visibility = View.GONE
             return
         }
         if (!validator.validPassword(password)) {
             Toast.makeText(applicationContext, "Please enter a valid password!", Toast.LENGTH_LONG).show()
+            progressBar!!.visibility = View.GONE
             return
         }
 

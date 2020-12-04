@@ -58,9 +58,9 @@ class ItemDetailsActivity : Activity() {
                         mUserEmail.text = item!!.userEmail.toString()
                         val geocoder = Geocoder(this@ItemDetailsActivity, Locale.getDefault())
                         val addresses: List<Address> = geocoder.getFromLocation(item!!.itemLatitude as Double, item!!.itemLongitude as Double, 1)
-                        val cityName: String = addresses[0].getAddressLine(0)
-                        val arr = cityName.split(", ")
-                        mLocation.text = arr[1] + ", " + arr[2]
+                        val address: String = addresses[0].getAddressLine(0)
+                        val cityAndStateNames = address.split(", ")
+                        mLocation.text = cityAndStateNames[1] + ", " + cityAndStateNames[2]
                         val ONE_MEGABYTE = 1024 * 1024.toLong()
                         storageListings = FirebaseStorage.getInstance().getReference("listings/" + item!!.itemID.toString())
                         storageListings.getBytes(ONE_MEGABYTE)
@@ -111,7 +111,7 @@ class ItemDetailsActivity : Activity() {
                     startActivity(intent)
                     true
                 }
-                R.id.profile -> {
+                R.id.listings -> {
                     // Respond to navigation item 3 click
                     true
                 }

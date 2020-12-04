@@ -1,5 +1,6 @@
 package cmsc436.semesterproject.localapparel
 
+// CITATION: Lab7
 class Validators {
     fun validEmail(email: String?) : Boolean {
         if (email.isNullOrEmpty()) {

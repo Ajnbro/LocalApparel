@@ -61,7 +61,7 @@ class AddItemActivity : Activity() {
     private lateinit var locationManager: LocationManager
     private lateinit var mLocationListener: LocationListener
     private var mAuth: FirebaseAuth? = null
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.add_item)
@@ -102,7 +102,7 @@ class AddItemActivity : Activity() {
                     // Respond to navigation item 2 click
                     true
                 }
-                R.id.profile -> {
+                R.id.listings -> {
                     // Respond to navigation item 3 click
                     true
                 }
@@ -123,11 +123,12 @@ class AddItemActivity : Activity() {
         startActivityForResult(
             Intent(
                 Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI
+                MediaStore.Images.Media.INTERNAL_CONTENT_URI
             ), GET_FROM_GALLERY
         )
     }
 
+    // CITATION: Lab11
     override fun onResume() {
         super.onResume()
         if (Build.VERSION.SDK_INT >= 23 &&
@@ -243,6 +244,7 @@ class AddItemActivity : Activity() {
             key,
             mAuth?.currentUser?.email
         )
+
         if(mImageBitmap == null) {
             val icon: Bitmap = BitmapFactory.decodeResource(
                 applicationContext.resources,
@@ -256,6 +258,7 @@ class AddItemActivity : Activity() {
         else {
             storageListings.child(key).putBytes(imageData)
         }
+
         databaseListings.child(key).setValue(item, object : DatabaseReference.CompletionListener {
             override fun onComplete(firebaseError: DatabaseError?, ref: DatabaseReference) {
                 if (firebaseError != null) {
@@ -289,6 +292,7 @@ class AddItemActivity : Activity() {
         mItemExpirationDate!!.text = dateString
     }
 
+    // CITATION: Lab4
     // DialogFragment used to pick a ToDoItem deadline date
     class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
 
@@ -316,11 +320,13 @@ class AddItemActivity : Activity() {
 
     }
 
+    // CITATION: Lab4
     private fun showDatePickerDialog() {
         val newFragment = DatePickerFragment()
         newFragment.show(fragmentManager, "datePicker")
     }
 
+    // CITATION: Lab11
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>, grantResults: IntArray
@@ -340,6 +346,7 @@ class AddItemActivity : Activity() {
         }
     }
 
+    // CITATION: Lab11
     private fun getLocationUpdates(){
         try {
             var loc = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -380,6 +387,7 @@ class AddItemActivity : Activity() {
 
     private fun makeLocationListener(): LocationListener {
         return object : LocationListener {
+            // CITATION: Lab11
             override fun onLocationChanged(location: Location) {
                 if(mLastLocationReading == null) {
                     mLastLocationReading = location
@@ -400,14 +408,12 @@ class AddItemActivity : Activity() {
     companion object {
         private val TAG = "LocalApparel-AddItemActivity"
 
-        private var dateString: String? = null
-
-        private val GET_FROM_GALLERY = 3;
-
+        // CITATION: Lab11
+        const val GET_FROM_GALLERY = 3;
         const val MY_PERMISSIONS_LOCATION = 4
-
         private const val FIVE_MINS = 5 * 60 * 1000.toLong()
-
+        // CITATION: Lab4
+        private var dateString: String? = null
         private fun setDateString(year: Int, monthOfYear: Int, dayOfMonth: Int) {
             var monthOfYear = monthOfYear
 

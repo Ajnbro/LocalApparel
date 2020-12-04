@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 
+// CITATION: Lab7
 class MainActivity : AppCompatActivity() {
 
     private var registerBtn: Button? = null

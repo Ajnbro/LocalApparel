@@ -26,7 +26,6 @@ import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
-
 class FeedActivity : AppCompatActivity() {
 
     lateinit var mNavBar: BottomNavigationView
@@ -44,6 +43,7 @@ class FeedActivity : AppCompatActivity() {
     private val mMinTime: Long = 5000
     private val mMinDistance = 1000.0f
 
+    // CITATION: based upon Lab7
     var databaseRefreshListingsListener: ValueEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             listings.clear()
@@ -107,14 +107,14 @@ class FeedActivity : AppCompatActivity() {
         listingsRecyclerView = findViewById<View>(R.id.feed) as RecyclerView
         listingsRecyclerView.layoutManager = LinearLayoutManager(this)
 
+
         var dividerItemDecoration = DividerItemDecoration(
             applicationContext,
             LinearLayoutManager.VERTICAL
         )
         dividerItemDecoration.setDrawable(
             applicationContext.resources.getDrawable(R.drawable.recycler_view_line)
-        );
-
+        )
         listingsRecyclerView.addItemDecoration(dividerItemDecoration)
 
         distancesSpinner = findViewById<View>(R.id.distances_spinner) as Spinner
@@ -155,7 +155,7 @@ class FeedActivity : AppCompatActivity() {
                     startActivity(intent)
                     true
                 }
-                R.id.profile -> {
+                R.id.listings -> {
                     // Respond to navigation item 3 click
                     true
                 }
@@ -170,6 +170,7 @@ class FeedActivity : AppCompatActivity() {
         databaseListings.addValueEventListener(databaseRefreshListingsListener)
     }
 
+    // CITATION: Lab11
     override fun onResume() {
         super.onResume()
         if (Build.VERSION.SDK_INT >= 23 &&
@@ -191,6 +192,7 @@ class FeedActivity : AppCompatActivity() {
         } else getLocationUpdates()
     }
 
+    // CITATION: Lab11
     private fun getLocationUpdates(){
         try {
             var loc = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -230,6 +232,7 @@ class FeedActivity : AppCompatActivity() {
 
     private fun makeLocationListener(): LocationListener {
         return object : LocationListener {
+            // CITATION: Lab11
             override fun onLocationChanged(location: Location) {
                 if(mLastLocationReading == null) {
                     mLastLocationReading = location
@@ -247,6 +250,7 @@ class FeedActivity : AppCompatActivity() {
         }
     }
 
+    // CITATION: Lab11
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>, grantResults: IntArray

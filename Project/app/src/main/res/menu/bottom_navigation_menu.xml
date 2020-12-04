@@ -2,7 +2,7 @@
     <item
         android:id="@+id/browse"
         android:enabled="true"
-        android:icon="@drawable/search"
+        android:icon="@drawable/browse"
         android:title="Browse"/>
     <item
         android:id="@+id/add"
@@ -10,8 +10,8 @@
         android:icon="@drawable/add"
         android:title="Add Listing"/>
     <item
-        android:id="@+id/profile"
+        android:id="@+id/listings"
         android:enabled="true"
-        android:icon="@drawable/feed"
+        android:icon="@drawable/listings"
         android:title="Your Listings"/>
 </menu>

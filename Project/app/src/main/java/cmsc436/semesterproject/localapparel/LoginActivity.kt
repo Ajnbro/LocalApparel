@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
+// CITATION: Lab7
 class LoginActivity : AppCompatActivity() {
     private var mDatabaseReference: DatabaseReference? = null
     private var mDatabase: FirebaseDatabase? = null
@@ -60,7 +61,6 @@ class LoginActivity : AppCompatActivity() {
                     Toast.makeText(applicationContext, "Login successful!", Toast.LENGTH_LONG)
                         .show()
                     val successfulLoginIntent = Intent(this@LoginActivity, FeedActivity::class.java)
-                    successfulLoginIntent.putExtra(USER_ID, mAuth!!.uid)
                     startActivity(successfulLoginIntent)
                 } else {
                     Toast.makeText(
@@ -70,10 +70,5 @@ class LoginActivity : AppCompatActivity() {
                     ).show()
                 }
             }
-    }
-
-    companion object {
-        const val USER_EMAIL = "com.example.tesla.myhomelibrary.useremail"
-        const val USER_ID = "com.example.tesla.myhomelibrary.userid"
     }
 }
