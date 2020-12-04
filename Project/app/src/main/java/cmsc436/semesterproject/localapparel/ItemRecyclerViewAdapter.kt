@@ -2,6 +2,7 @@ package cmsc436.semesterproject.localapparel
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,7 @@ import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import java.io.ByteArrayOutputStream
 import java.text.DecimalFormat
 
 // CITATION: Based upon UIRecyclerView
@@ -33,8 +35,14 @@ internal class ItemRecyclerViewAdapter(
         var item = mItems[i]
         viewHolder.itemName.text = item.itemName
 
+        // format the price string
         val decim = DecimalFormat("0.00")
         viewHolder.itemPrice.text = "$" + decim.format(item!!.itemPrice)
+
+        // tag on the " hourly rate" if its for rent
+        if (item!!.isForRent!!) {
+            viewHolder.mPriceRentalText.visibility = View.VISIBLE
+        }
 
         val ONE_MEGABYTE = 1024 * 1024.toLong()
         var storageListings: StorageReference = FirebaseStorage.getInstance().getReference("listings/" + item!!.itemID.toString())
@@ -43,7 +51,11 @@ internal class ItemRecyclerViewAdapter(
                 val bitmap = BitmapFactory.decodeByteArray(it, 0, it?.size as Int)
                 viewHolder.itemImage.setImageBitmap(bitmap)
             }).addOnFailureListener(OnFailureListener {
-                // Potentially do something
+                val stubBitmap: Bitmap = BitmapFactory.decodeResource(
+                    context.resources,
+                    R.drawable.stub
+                )
+                viewHolder.itemImage.setImageBitmap(stubBitmap)
             })
 
         viewHolder.itemView.setOnClickListener(View.OnClickListener { v ->
@@ -63,6 +75,7 @@ internal class ItemRecyclerViewAdapter(
         internal val itemName: TextView = itemView.findViewById(R.id.itemName)
         internal val itemImage: ImageView = itemView.findViewById(R.id.itemImage)
         internal val itemPrice: TextView = itemView.findViewById(R.id.itemPrice)
+        internal val mPriceRentalText: TextView = itemView.findViewById(R.id.rentalHourly)
     }
 
 }

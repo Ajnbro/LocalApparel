@@ -18,11 +18,29 @@
         android:layout_below="@id/itemName">
     </ImageView>
 
-    <TextView
-        android:id="@+id/itemPrice"
-        android:layout_width="match_parent"
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:layout_below="@id/itemImage"></TextView>
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/itemPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_below="@id/itemImage"></TextView>
+
+        <TextView
+            android:id="@+id/rentalHourly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            android:text=" hourly rate"
+            android:layout_toRightOf="@id/itemPrice"
+            android:textColor="@color/colorBlack"
+            android:layout_below="@id/itemImage">
+        </TextView>
+    </LinearLayout>
 
 </LinearLayout>

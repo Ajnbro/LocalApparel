@@ -2,6 +2,7 @@ package cmsc436.semesterproject.localapparel
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.location.Address
 import android.location.Geocoder
@@ -50,27 +51,38 @@ class ItemDetailsActivity : Activity() {
                     return
                 } finally {
                     if (item!!.itemID == itemID) {
-                        mName.text = item!!.itemName
-                        mDescription.text = item!!.itemDescription
+                        mName.text = item.itemName
+
+                        mDescription.text = item.itemDescription
+
                         val decim = DecimalFormat("0.00")
-                        mPrice.text = "$" + decim.format(item!!.itemPrice)
-                        mExpiration.text = item!!.listingExpirationDate
-                        mIsForSale.isChecked = item!!.isForSale as Boolean
-                        mIsForRent.isChecked = item!!.isForRent as Boolean
-                        mUserEmail.text = item!!.userEmail.toString()
+                        if (item.isForRent!!) {
+                            mPrice.text = "$" + decim.format(item.itemPrice) + " hourly rate"
+                        } else {
+                            mPrice.text = "$" + decim.format(item.itemPrice)
+                        }
+
+                        mExpiration.text = item.listingExpirationDate
+                        mIsForSale.isChecked = item.isForSale as Boolean
+                        mIsForRent.isChecked = item.isForRent as Boolean
+                        mUserEmail.text = item.userEmail.toString()
                         val geocoder = Geocoder(this@ItemDetailsActivity, Locale.getDefault())
-                        val addresses: List<Address> = geocoder.getFromLocation(item!!.itemLatitude as Double, item!!.itemLongitude as Double, 1)
+                        val addresses: List<Address> = geocoder.getFromLocation(item.itemLatitude as Double, item.itemLongitude as Double, 1)
                         val address: String = addresses[0].getAddressLine(0)
                         val cityAndStateNames = address.split(", ")
                         mLocation.text = cityAndStateNames[1] + ", " + cityAndStateNames[2]
                         val ONE_MEGABYTE = 1024 * 1024.toLong()
-                        storageListings = FirebaseStorage.getInstance().getReference("listings/" + item!!.itemID.toString())
+                        storageListings = FirebaseStorage.getInstance().getReference("listings/" + item.itemID.toString())
                         storageListings.getBytes(ONE_MEGABYTE)
                             .addOnSuccessListener(OnSuccessListener<ByteArray?> {
                                 val bitmap = BitmapFactory.decodeByteArray(it, 0, it?.size as Int)
                                 mImage.setImageBitmap(bitmap)
                             }).addOnFailureListener(OnFailureListener {
-                                // Potentially do something
+                                val stubBitmap: Bitmap = BitmapFactory.decodeResource(
+                                    applicationContext.resources,
+                                    R.drawable.stub
+                                )
+                                mImage.setImageBitmap(stubBitmap)
                             })
                     }
                 }

@@ -33,6 +33,7 @@ import java.io.ByteArrayOutputStream
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -83,7 +84,7 @@ class AddItemActivity : Activity() {
         mItemSaleCheckBox!!.setOnCheckedChangeListener { _, checked: Boolean ->
             if (checked) {
                 mItemRentCheckBox!!.isChecked = false;
-                mPriceRentalText!!.visibility = View.GONE
+                mPriceRentalText!!.visibility = View.INVISIBLE
             }
         }
 
@@ -92,7 +93,7 @@ class AddItemActivity : Activity() {
                 mItemSaleCheckBox!!.isChecked = false;
                 mPriceRentalText!!.visibility = View.VISIBLE
             } else {
-                mPriceRentalText!!.visibility = View.GONE
+                mPriceRentalText!!.visibility = View.INVISIBLE
             }
         }
 
@@ -229,20 +230,33 @@ class AddItemActivity : Activity() {
             return
         }
 
-        // TODO ENSURE THAT AN IMAGE IS PASSED
-        val baos = ByteArrayOutputStream()
-        mImageBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-        val imageData: ByteArray = baos.toByteArray()
+        if (itemPrice > 1000000) {
+            Toast.makeText(
+                applicationContext,
+                "Error posting listing! The item price may not exceed $1,000,000.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
 
         val c = Calendar.getInstance()
-        val year = c.get(Calendar.YEAR)
-        val month = c.get(Calendar.MONTH)
-        val day = c.get(Calendar.DAY_OF_MONTH)
-        setDateString(year, month, day)
-        var listingPostDate = dateString
-
-        // TODO ENSURE THAT THE SPECIFIED DATE HAS NOT ALREADY EXPIRED
+        var listingPostDate = dateString(c.get(Calendar.YEAR), c.get(Calendar.MONTH),
+        c.get(Calendar.DAY_OF_MONTH))
         var listingExpirationDate = mItemExpirationDate!!.text.toString()
+
+        // Ensure that the specified expiration date has not already expired
+        val sdf = SimpleDateFormat("yyyy-MM-dd")
+        val expirationDate: Date = sdf.parse(listingExpirationDate)
+        val postingDate: Date = sdf.parse(listingPostDate)
+
+        if (postingDate.after(expirationDate)) {
+            Toast.makeText(
+                applicationContext,
+                "Error posting listing! The expiration date has already passed.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
 
         var userID = FirebaseAuth.getInstance().currentUser!!.uid
         val key = databaseListings.push().key.toString()
@@ -263,16 +277,16 @@ class AddItemActivity : Activity() {
         )
 
         if(mImageBitmap == null) {
-            val icon: Bitmap = BitmapFactory.decodeResource(
-                applicationContext.resources,
-                R.drawable.stub
-            )
+            Toast.makeText(
+                applicationContext,
+                "Error posting listing! An image of the item must be uploaded.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        } else {
             val baos = ByteArrayOutputStream()
-            icon?.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-            val stubImage: ByteArray = baos.toByteArray()
-            storageListings.child(key).putBytes(stubImage)
-        }
-        else {
+            mImageBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+            val imageData: ByteArray = baos.toByteArray()
             storageListings.child(key).putBytes(imageData)
         }
 
@@ -301,12 +315,8 @@ class AddItemActivity : Activity() {
         mDate = Date()
 
         val c = Calendar.getInstance()
-        setDateString(
-            c.get(Calendar.YEAR), c.get(Calendar.MONTH),
-            c.get(Calendar.DAY_OF_MONTH)
-        )
-
-        mItemExpirationDate!!.text = dateString
+        mItemExpirationDate!!.text = dateString(c.get(Calendar.YEAR), c.get(Calendar.MONTH),
+            c.get(Calendar.DAY_OF_MONTH))
     }
 
     // CITATION: Lab4
@@ -330,9 +340,8 @@ class AddItemActivity : Activity() {
             view: DatePicker, year: Int, monthOfYear: Int,
             dayOfMonth: Int
         ) {
-            setDateString(year, monthOfYear, dayOfMonth)
             val dateView: TextView = activity.findViewById(R.id.itemExpirationDate)
-            dateView.text = dateString
+            dateView.text = dateString(year, monthOfYear, dayOfMonth)
         }
 
     }
@@ -366,19 +375,19 @@ class AddItemActivity : Activity() {
     // CITATION: Lab11
     private fun getLocationUpdates(){
         try {
-            var loc = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            var loc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (loc != null && (System.currentTimeMillis() - loc.time) < FIVE_MINS) {
                 mLastLocationReading = loc;
             }
 
-            loc = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (loc != null && (System.currentTimeMillis() - loc.time) < FIVE_MINS) {
                 mLastLocationReading = loc;
             }
 
-            if (null != locationManager!!.getProvider(LocationManager.NETWORK_PROVIDER)) {
+            if (null != locationManager.getProvider(LocationManager.NETWORK_PROVIDER)) {
                 Log.i(TAG, "Network location updates requested")
-                locationManager!!.requestLocationUpdates(
+                locationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
                     mMinTime,
                     mMinDistance,
@@ -386,9 +395,9 @@ class AddItemActivity : Activity() {
                 )
             }
 
-            if (null != locationManager!!.getProvider(LocationManager.GPS_PROVIDER)) {
+            if (null != locationManager.getProvider(LocationManager.GPS_PROVIDER)) {
                 Log.i(TAG, "GPS location updates requested")
-                locationManager!!.requestLocationUpdates(
+                locationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
                     mMinTime,
                     mMinDistance,
@@ -397,7 +406,7 @@ class AddItemActivity : Activity() {
             }
 
         } catch (e: SecurityException) {
-            Log.d(TAG, e.localizedMessage)
+            Log.d(TAG, e.localizedMessage.toString())
         }
     }
 
@@ -430,21 +439,20 @@ class AddItemActivity : Activity() {
         const val MY_PERMISSIONS_LOCATION = 4
         private const val FIVE_MINS = 5 * 60 * 1000.toLong()
         // CITATION: Lab4
-        private var dateString: String? = null
-        private fun setDateString(year: Int, monthOfYear: Int, dayOfMonth: Int) {
-            var monthOfYear = monthOfYear
+        private fun dateString(year: Int, monthOfYear: Int, dayOfMonth: Int): String {
+            var month = monthOfYear
 
             // Increment monthOfYear for Calendar/Date -> Time Format setting
-            monthOfYear++
-            var mon = "" + monthOfYear
+            month++
+            var mon = "" + month
             var day = "" + dayOfMonth
 
-            if (monthOfYear < 10)
-                mon = "0$monthOfYear"
+            if (month < 10)
+                mon = "0$month"
             if (dayOfMonth < 10)
                 day = "0$dayOfMonth"
 
-            dateString = "$year-$mon-$day"
+            return "$year-$mon-$day"
         }
     }
 }

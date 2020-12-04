@@ -15,6 +15,7 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -25,6 +26,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 class FeedActivity : AppCompatActivity() {
 
@@ -57,7 +61,7 @@ class FeedActivity : AppCompatActivity() {
                     return
                 } finally {
                     var itemLat = item!!.itemLatitude as Double
-                    var itemLong = item!!.itemLongitude as Double
+                    var itemLong = item.itemLongitude as Double
                     var diff = FloatArray(1)
                     distanceBetween(
                         itemLat,
@@ -69,14 +73,19 @@ class FeedActivity : AppCompatActivity() {
 
                     var dist = diff[0] * 0.000621371192;
 
-                    /* TWEAK THIS TO WORK LATER ON
+
+                    val c = Calendar.getInstance()
+                    var today = dateString(
+                        c.get(Calendar.YEAR), c.get(Calendar.MONTH),
+                        c.get(Calendar.DAY_OF_MONTH)
+                    )
+                    var listingExpirationDate = item.listingExpirationDate
+                    // Ensure that the specified expiration date has not already expired
                     val sdf = SimpleDateFormat("yyyy-MM-dd")
-                    val expiration: Date = sdf.parse(item!!.listingExpirationDate)
-                    val today = Date()
-                    if ((dist <= mDistance) && !Date(today!!.time + ONE_DAY).after(expiration)) {
-                        listings.add(item!!)
-                    } */
-                    if ((dist <= mDistance)) {
+                    val expirationDate: Date = sdf.parse(listingExpirationDate)
+                    val todayDate: Date = sdf.parse(today)
+
+                    if ((dist <= mDistance) && !todayDate.after(expirationDate)) {
                         listings.add(item!!)
                     }
                 }
@@ -275,5 +284,21 @@ class FeedActivity : AppCompatActivity() {
         const val MY_PERMISSIONS_LOCATION = 4
         val ONE_DAY = 86400000
         private const val FIVE_MINS = 5 * 60 * 1000.toLong()
+        // CITATION: Lab4
+        private fun dateString(year: Int, monthOfYear: Int, dayOfMonth: Int): String {
+            var month = monthOfYear
+
+            // Increment monthOfYear for Calendar/Date -> Time Format setting
+            month++
+            var mon = "" + month
+            var day = "" + dayOfMonth
+
+            if (month < 10)
+                mon = "0$month"
+            if (dayOfMonth < 10)
+                day = "0$dayOfMonth"
+
+            return "$year-$mon-$day"
+        }
     }
 }
