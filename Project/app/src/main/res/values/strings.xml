@@ -15,4 +15,15 @@
         <item>20 miles</item>
         <item>25 miles</item>
     </string-array>
+    <string name="intro_slide1_title">Welcome to Local Apparel</string>
+    <string name="intro_slide1_desc">This app is designed to allow users to buy and sell clothes to others in their area</string>
+    <string name="intro_slide2_title">Location Based Shopping</string>
+    <string name="intro_slide2_desc">Upon logging into the app, you will be shown all of the local apparel listings in your area </string>
+    <string name="intro_slide3_title">Add Your Own Listings </string>
+    <string name="intro_slide3_desc">Adding your own listings is simple, and once you add a new item, all Local Apparel users in your area will be able to see and buy your product!</string>
+    <string name="intro_slide4_title">Get Started</string>
+    <string name="intro_slide4_desc">Ready to go? Click the check mark to make your account!</string>
+
+
+
 </resources>
