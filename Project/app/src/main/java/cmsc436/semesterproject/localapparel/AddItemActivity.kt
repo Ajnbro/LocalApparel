@@ -16,8 +16,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.*
@@ -47,6 +45,7 @@ class AddItemActivity : Activity() {
     private var mItemImage: ImageView? = null
     private var mItemDescription: EditText? = null
     private var mItemPrice: CurrencyEditText? = null
+    private var mPriceRentalText: TextView? = null
     private var mItemSaleCheckBox: CheckBox? = null
     private var mItemRentCheckBox: CheckBox? = null
     private var mItemExpirationDate: TextView? = null
@@ -74,10 +73,28 @@ class AddItemActivity : Activity() {
         mImageUploadButton = findViewById<View>(R.id.itemImageUpload) as Button
         mItemDescription = findViewById<View>(R.id.itemDescription) as EditText
         mItemPrice = findViewById<View>(R.id.itemPrice) as CurrencyEditText
-        mItemSaleCheckBox = findViewById<View>(R.id.itemForSale) as CheckBox
-        mItemRentCheckBox = findViewById<View>(R.id.itemForRent) as CheckBox
+        mPriceRentalText = findViewById<View>(R.id.rentalHourly) as TextView
         mItemExpirationDate = findViewById<View>(R.id.itemExpirationDate) as TextView
         mItemImage = findViewById<View>(R.id.itemImage) as ImageView
+
+        mItemSaleCheckBox = findViewById<View>(R.id.itemForSale) as CheckBox
+        mItemRentCheckBox = findViewById<View>(R.id.itemForRent) as CheckBox
+
+        mItemSaleCheckBox!!.setOnCheckedChangeListener { _, checked: Boolean ->
+            if (checked) {
+                mItemRentCheckBox!!.isChecked = false;
+                mPriceRentalText!!.visibility = View.GONE
+            }
+        }
+
+        mItemRentCheckBox!!.setOnCheckedChangeListener {_, checked: Boolean ->
+            if (checked) {
+                mItemSaleCheckBox!!.isChecked = false;
+                mPriceRentalText!!.visibility = View.VISIBLE
+            } else {
+                mPriceRentalText!!.visibility = View.GONE
+            }
+        }
 
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
@@ -193,10 +210,10 @@ class AddItemActivity : Activity() {
         var isForSale = mItemSaleCheckBox!!.isChecked
         var isForRent = mItemRentCheckBox!!.isChecked
 
-        if (!(isForSale || isForRent)) {
+        if (!isForSale && !isForRent) {
             Toast.makeText(
                 applicationContext,
-                "Error posting listing! The item must be listed for sale or for rent at least.",
+                "Error posting listing! The item must be listed for sale or for rent.",
                 Toast.LENGTH_LONG
             ).show()
             return

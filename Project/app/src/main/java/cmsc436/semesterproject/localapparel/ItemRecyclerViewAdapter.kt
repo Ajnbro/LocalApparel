@@ -13,6 +13,7 @@ import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import java.text.DecimalFormat
 
 // CITATION: Based upon UIRecyclerView
 internal class ItemRecyclerViewAdapter(
@@ -31,7 +32,9 @@ internal class ItemRecyclerViewAdapter(
     override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
         var item = mItems[i]
         viewHolder.itemName.text = item.itemName
-        viewHolder.itemPrice.text = "$" + item.itemPrice.toString()
+
+        val decim = DecimalFormat("0.00")
+        viewHolder.itemPrice.text = "$" + decim.format(item!!.itemPrice)
 
         val ONE_MEGABYTE = 1024 * 1024.toLong()
         var storageListings: StorageReference = FirebaseStorage.getInstance().getReference("listings/" + item!!.itemID.toString())

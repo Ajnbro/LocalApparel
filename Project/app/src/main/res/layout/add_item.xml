@@ -103,13 +103,24 @@
     <!-- Component Citation: https://github.com/CottaCush/CurrencyEditText -->
     <com.cottacush.android.currencyedittext.CurrencyEditText
         android:id="@+id/itemPrice"
-        android:layout_width="150dp"
+        android:layout_width="125dp"
         android:layout_height="wrap_content"
         android:background="@drawable/border"
         android:ems="10"
         app:currencySymbol="$"
         app:useCurrencySymbolAsHint="true"
         android:layout_below="@id/price"/>
+
+    <TextView
+        android:id="@+id/rentalHourly"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="125dp"
+        android:visibility="gone"
+        android:text=" hourly rate"
+        android:textColor="@color/colorBlack"
+        android:layout_below="@id/price">
+    </TextView>
 
     <TextView
         android:id="@+id/expiration"

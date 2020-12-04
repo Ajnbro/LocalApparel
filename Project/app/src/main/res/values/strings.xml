@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LocalApparel</string>
+    <string name="app_name">Local Apparel</string>
     <string name="register_new_account">Register new account</string>
     <string name="add">Add</string>
     <string name="account_login">Account Login</string>

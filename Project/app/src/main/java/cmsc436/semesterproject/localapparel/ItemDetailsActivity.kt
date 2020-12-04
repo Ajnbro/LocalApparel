@@ -17,6 +17,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import java.text.DecimalFormat
 import java.util.*
 
 
@@ -51,7 +52,8 @@ class ItemDetailsActivity : Activity() {
                     if (item!!.itemID == itemID) {
                         mName.text = item!!.itemName
                         mDescription.text = item!!.itemDescription
-                        mPrice.text = "$" + item!!.itemPrice.toString()
+                        val decim = DecimalFormat("0.00")
+                        mPrice.text = "$" + decim.format(item!!.itemPrice)
                         mExpiration.text = item!!.listingExpirationDate
                         mIsForSale.isChecked = item!!.isForSale as Boolean
                         mIsForRent.isChecked = item!!.isForRent as Boolean
