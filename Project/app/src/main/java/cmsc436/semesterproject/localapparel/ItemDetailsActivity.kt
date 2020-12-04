@@ -21,11 +21,9 @@ import com.google.firebase.storage.StorageReference
 import java.text.DecimalFormat
 import java.util.*
 
-
 class ItemDetailsActivity : Activity() {
 
-    lateinit var mNavBar: BottomNavigationView
-
+    // Item variables
     var itemID: String? = null
     lateinit var mName: TextView
     lateinit var mImage: ImageView
@@ -37,10 +35,11 @@ class ItemDetailsActivity : Activity() {
     lateinit var mLocation: TextView
     lateinit var mUserEmail: TextView
 
-    // Firebase
+    // Firebase variables
     private lateinit var databaseListings: DatabaseReference
     private lateinit var storageListings: StorageReference
     var databaseRefreshListingsListener: ValueEventListener = object : ValueEventListener {
+        // Sets the values of the item detail variables
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             var item: ApparelItem? = null
             for (postSnapshot in dataSnapshot.children) {
@@ -51,10 +50,13 @@ class ItemDetailsActivity : Activity() {
                     return
                 } finally {
                     if (item!!.itemID == itemID) {
+                        // Sets the item name
                         mName.text = item.itemName
 
+                        // Sets the item description
                         mDescription.text = item.itemDescription
 
+                        // Sets the item price (and visibility of " hourly rate")
                         val decim = DecimalFormat("0.00")
                         if (item.isForRent!!) {
                             mPrice.text = "$" + decim.format(item.itemPrice) + " hourly rate"
@@ -62,22 +64,33 @@ class ItemDetailsActivity : Activity() {
                             mPrice.text = "$" + decim.format(item.itemPrice)
                         }
 
+                        // Sets the item expiration date
                         mExpiration.text = item.listingExpirationDate
+
+                        // Sets the item's sale/rent status
                         mIsForSale.isChecked = item.isForSale as Boolean
                         mIsForRent.isChecked = item.isForRent as Boolean
+
+                        // Sets the seller's contact information
                         mUserEmail.text = item.userEmail.toString()
+
+                        // Sets the seller's/item's location
                         val geocoder = Geocoder(this@ItemDetailsActivity, Locale.getDefault())
                         val addresses: List<Address> = geocoder.getFromLocation(item.itemLatitude as Double, item.itemLongitude as Double, 1)
                         val address: String = addresses[0].getAddressLine(0)
                         val cityAndStateNames = address.split(", ")
                         mLocation.text = cityAndStateNames[1] + ", " + cityAndStateNames[2]
+
+                        // Gets the item image from Firebase
                         val ONE_MEGABYTE = 1024 * 1024.toLong()
                         storageListings = FirebaseStorage.getInstance().getReference("listings/" + item.itemID.toString())
                         storageListings.getBytes(ONE_MEGABYTE)
                             .addOnSuccessListener(OnSuccessListener<ByteArray?> {
+                                // Sets the mImage bitmap as the item image
                                 val bitmap = BitmapFactory.decodeByteArray(it, 0, it?.size as Int)
                                 mImage.setImageBitmap(bitmap)
                             }).addOnFailureListener(OnFailureListener {
+                                // An issue occurred and the mImage bitmap will be set to the stub image
                                 val stubBitmap: Bitmap = BitmapFactory.decodeResource(
                                     applicationContext.resources,
                                     R.drawable.stub
@@ -95,8 +108,10 @@ class ItemDetailsActivity : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.item_details)
 
+        // Grab the ID of the item to show the details for
         itemID = intent.getStringExtra("ITEM ID")
 
+        // Item detail variables
         mName = findViewById<View>(R.id.itemName) as TextView
         mImage = findViewById<View>(R.id.itemImage) as ImageView
         mDescription = findViewById<View>(R.id.itemDescription) as TextView
@@ -107,10 +122,12 @@ class ItemDetailsActivity : Activity() {
         mLocation = findViewById<View>(R.id.itemLocation) as TextView
         mUserEmail = findViewById<View>(R.id.userEmail) as TextView
 
+        // Sets up Firebase variables
         databaseListings = FirebaseDatabase.getInstance().getReference("listings")
         databaseListings.addListenerForSingleValueEvent(databaseRefreshListingsListener)
 
-        mNavBar = findViewById<View>(R.id.bottom_navigation) as BottomNavigationView
+        // Sets up the bottom navbar
+        var mNavBar = findViewById<View>(R.id.bottom_navigation) as BottomNavigationView
         mNavBar.setOnNavigationItemSelectedListener { item ->
             when(item.itemId) {
                 R.id.browse -> {

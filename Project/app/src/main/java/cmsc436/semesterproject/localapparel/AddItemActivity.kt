@@ -36,10 +36,9 @@ import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
-
 class AddItemActivity : Activity() {
 
-    private var mDate: Date? = null
+    // AddItem variables
     private var mItemName: EditText? = null
     private var mImageUploadButton: Button? = null
     private var mImageBitmap: Bitmap? = null
@@ -50,26 +49,23 @@ class AddItemActivity : Activity() {
     private var mItemSaleCheckBox: CheckBox? = null
     private var mItemRentCheckBox: CheckBox? = null
     private var mItemExpirationDate: TextView? = null
-    private var mLastLocationReading: Location? = null
 
-    private val mMinTime: Long = 5000
-    private val mMinDistance = 1000.0f
-
-    lateinit var mNavBar: BottomNavigationView
+    // Firebase variables
     private lateinit var databaseListings: DatabaseReference
     private lateinit var storageListings: StorageReference
+    private var mAuth: FirebaseAuth? = null
+
+    // Location variables
     private lateinit var locationManager: LocationManager
     private lateinit var mLocationListener: LocationListener
-    private var mAuth: FirebaseAuth? = null
+    private var mLastLocationReading: Location? = null
+    private val mMinTime: Long = 5000
+    private val mMinDistance = 1000.0f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.add_item)
 
-        databaseListings = FirebaseDatabase.getInstance().getReference("listings")
-        storageListings = FirebaseStorage.getInstance().getReference("listings")
-
-        mLocationListener = makeLocationListener()
         mItemName = findViewById<View>(R.id.itemName) as EditText
         mImageUploadButton = findViewById<View>(R.id.itemImageUpload) as Button
         mItemDescription = findViewById<View>(R.id.itemDescription) as EditText
@@ -77,17 +73,18 @@ class AddItemActivity : Activity() {
         mPriceRentalText = findViewById<View>(R.id.rentalHourly) as TextView
         mItemExpirationDate = findViewById<View>(R.id.itemExpirationDate) as TextView
         mItemImage = findViewById<View>(R.id.itemImage) as ImageView
-
         mItemSaleCheckBox = findViewById<View>(R.id.itemForSale) as CheckBox
         mItemRentCheckBox = findViewById<View>(R.id.itemForRent) as CheckBox
 
-        mItemSaleCheckBox!!.setOnCheckedChangeListener { _, checked: Boolean ->
+        // Adds a listener to handle mPriceRentalText visibility and ensure that the sibling checkbox is unchecked
+        mItemSaleCheckBox!!.setOnCheckedChangeListener {_, checked: Boolean ->
             if (checked) {
                 mItemRentCheckBox!!.isChecked = false;
                 mPriceRentalText!!.visibility = View.INVISIBLE
             }
         }
 
+        // Adds a listener to handle mPriceRentalText visibility and ensure that the sibling checkbox is unchecked
         mItemRentCheckBox!!.setOnCheckedChangeListener {_, checked: Boolean ->
             if (checked) {
                 mItemSaleCheckBox!!.isChecked = false;
@@ -97,17 +94,22 @@ class AddItemActivity : Activity() {
             }
         }
 
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
+        // Setting up Firebase resources
+        databaseListings = FirebaseDatabase.getInstance().getReference("listings")
+        storageListings = FirebaseStorage.getInstance().getReference("listings")
         mAuth = FirebaseAuth.getInstance()
+
+        // Setting up Location resources
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        mLocationListener = makeLocationListener()
 
         // Set the default date
         setDefaultDate()
-
-        val datePickerButton = findViewById<View>(R.id.date_picker_button) as Button
+        val datePickerButton = findViewById<View>(R.id.expirationDateButton) as Button
         datePickerButton.setOnClickListener { showDatePickerDialog() }
 
-        mNavBar = findViewById<View>(R.id.bottom_navigation) as BottomNavigationView
+        // Sets up the bottom navbar
+        var mNavBar = findViewById<View>(R.id.bottom_navigation) as BottomNavigationView
         mNavBar.setOnNavigationItemSelectedListener { item ->
             when(item.itemId) {
                 R.id.browse -> {
@@ -128,27 +130,30 @@ class AddItemActivity : Activity() {
             }
         }
 
-        // Set up OnClickListener for the Submit Button
+        // Sets up the submit button
         val submitButton = findViewById<View>(R.id.submitButton) as Button
         submitButton.setOnClickListener {
             submitListing()
         }
 
+        // Sets up the ability to upload an image
         mImageUploadButton!!.setOnClickListener { imageOnClick() }
     }
 
+    // Starts an activity to select an image from camera roll
     private fun imageOnClick() {
         startActivityForResult(
             Intent(
                 Intent.ACTION_PICK,
                 MediaStore.Images.Media.INTERNAL_CONTENT_URI
-            ), GET_FROM_GALLERY
+            ), IMAGE_SELECTION
         )
     }
 
     // CITATION: Lab11
     override fun onResume() {
         super.onResume()
+        // Check for location permissions
         if (Build.VERSION.SDK_INT >= 23 &&
             ContextCompat.checkSelfPermission(
                 applicationContext,
@@ -168,16 +173,17 @@ class AddItemActivity : Activity() {
         } else getLocationUpdates()
     }
 
+    // Occurs after the image is selected from the photo gallery
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         super.onActivityResult(requestCode, resultCode, data)
-        //Detects request codes
-        if (requestCode == GET_FROM_GALLERY && resultCode == RESULT_OK) {
+        if (requestCode == IMAGE_SELECTION && resultCode == RESULT_OK) {
             val selectedImage: Uri? = data.data
             try {
                 mImageBitmap = MediaStore.Images.Media.getBitmap(
                     this.contentResolver,
                     selectedImage
                 )
+                // Set the image selected in the photo gallery to the item image
                 mItemImage?.setImageBitmap(mImageBitmap)
             } catch (e: FileNotFoundException) {
                 e.printStackTrace()
@@ -187,7 +193,9 @@ class AddItemActivity : Activity() {
         }
     }
 
+    // Validates user input and puts the item in Firebase
     private fun submitListing() {
+        // Validate the item name
         var itemName = mItemName!!.text.toString()
         if (itemName.equals("")) {
             Toast.makeText(
@@ -198,6 +206,7 @@ class AddItemActivity : Activity() {
             return
         }
 
+        // Validate the item description
         var itemDescription = mItemDescription!!.text.toString()
         if (itemDescription.equals("")) {
             Toast.makeText(
@@ -208,9 +217,9 @@ class AddItemActivity : Activity() {
             return
         }
 
+        // Validate the item status (forSale v. forRent)
         var isForSale = mItemSaleCheckBox!!.isChecked
         var isForRent = mItemRentCheckBox!!.isChecked
-
         if (!isForSale && !isForRent) {
             Toast.makeText(
                 applicationContext,
@@ -220,6 +229,7 @@ class AddItemActivity : Activity() {
             return
         }
 
+        // Validate the item price
         var itemPrice = mItemPrice!!.getNumericValue()
         if (itemPrice == null) {
             Toast.makeText(
@@ -229,7 +239,6 @@ class AddItemActivity : Activity() {
             ).show()
             return
         }
-
         if (itemPrice > 1000000) {
             Toast.makeText(
                 applicationContext,
@@ -239,6 +248,7 @@ class AddItemActivity : Activity() {
             return
         }
 
+        // Validate the specified expiration date
         val c = Calendar.getInstance()
         var listingPostDate = dateString(c.get(Calendar.YEAR), c.get(Calendar.MONTH),
         c.get(Calendar.DAY_OF_MONTH))
@@ -248,7 +258,6 @@ class AddItemActivity : Activity() {
         val sdf = SimpleDateFormat("yyyy-MM-dd")
         val expirationDate: Date = sdf.parse(listingExpirationDate)
         val postingDate: Date = sdf.parse(listingPostDate)
-
         if (postingDate.after(expirationDate)) {
             Toast.makeText(
                 applicationContext,
@@ -258,6 +267,7 @@ class AddItemActivity : Activity() {
             return
         }
 
+        // Grab the userID and key to store within the Firebase item
         var userID = FirebaseAuth.getInstance().currentUser!!.uid
         val key = databaseListings.push().key.toString()
 
@@ -276,6 +286,7 @@ class AddItemActivity : Activity() {
             mAuth?.currentUser?.email
         )
 
+        // Validate that an image was selected and submitted to the application
         if(mImageBitmap == null) {
             Toast.makeText(
                 applicationContext,
@@ -290,6 +301,7 @@ class AddItemActivity : Activity() {
             storageListings.child(key).putBytes(imageData)
         }
 
+        // Upload the item to Firebase
         databaseListings.child(key).setValue(item, object : DatabaseReference.CompletionListener {
             override fun onComplete(firebaseError: DatabaseError?, ref: DatabaseReference) {
                 if (firebaseError != null) {
@@ -311,28 +323,24 @@ class AddItemActivity : Activity() {
         })
     }
 
+    // Sets the default expiration date to today
     private fun setDefaultDate() {
-        mDate = Date()
-
-        val c = Calendar.getInstance()
-        mItemExpirationDate!!.text = dateString(c.get(Calendar.YEAR), c.get(Calendar.MONTH),
-            c.get(Calendar.DAY_OF_MONTH))
+        val today = Calendar.getInstance()
+        mItemExpirationDate!!.text = dateString(today.get(Calendar.YEAR), today.get(Calendar.MONTH),
+            today.get(Calendar.DAY_OF_MONTH))
     }
 
     // CITATION: Lab4
-    // DialogFragment used to pick a ToDoItem deadline date
+    // The DialogFragment class will be used to select the expiration date for the Item
     class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-            // Use the current date as the default date in the picker
-
-            val c = Calendar.getInstance()
-            val year = c.get(Calendar.YEAR)
-            val month = c.get(Calendar.MONTH)
-            val day = c.get(Calendar.DAY_OF_MONTH)
-
-            // Create a new instance of DatePickerDialog and return it
+            // Set the default date within the date picker to today
+            val today = Calendar.getInstance()
+            val year = today.get(Calendar.YEAR)
+            val month = today.get(Calendar.MONTH)
+            val day = today.get(Calendar.DAY_OF_MONTH)
             return DatePickerDialog(activity, this, year, month, day)
         }
 
@@ -340,6 +348,7 @@ class AddItemActivity : Activity() {
             view: DatePicker, year: Int, monthOfYear: Int,
             dayOfMonth: Int
         ) {
+            // Update the expiration date shown to the user with the newly selected date
             val dateView: TextView = activity.findViewById(R.id.itemExpirationDate)
             dateView.text = dateString(year, monthOfYear, dayOfMonth)
         }
@@ -353,6 +362,7 @@ class AddItemActivity : Activity() {
     }
 
     // CITATION: Lab11
+    // Ensures that permissions have been properly granted for Location services
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>, grantResults: IntArray
@@ -373,15 +383,16 @@ class AddItemActivity : Activity() {
     }
 
     // CITATION: Lab11
+    // Gets the last known location for the user if the prior known location is older than 3 minutes
     private fun getLocationUpdates(){
         try {
             var loc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if (loc != null && (System.currentTimeMillis() - loc.time) < FIVE_MINS) {
+            if (loc != null && (System.currentTimeMillis() - loc.time) < THREE_MINS) {
                 mLastLocationReading = loc;
             }
 
             loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (loc != null && (System.currentTimeMillis() - loc.time) < FIVE_MINS) {
+            if (loc != null && (System.currentTimeMillis() - loc.time) < THREE_MINS) {
                 mLastLocationReading = loc;
             }
 
@@ -410,7 +421,7 @@ class AddItemActivity : Activity() {
         }
     }
 
-
+    // Makes a location listener used by the location manager to set the last known location
     private fun makeLocationListener(): LocationListener {
         return object : LocationListener {
             // CITATION: Lab11
@@ -435,14 +446,14 @@ class AddItemActivity : Activity() {
         private val TAG = "LocalApparel-AddItemActivity"
 
         // CITATION: Lab11
-        const val GET_FROM_GALLERY = 3;
+        const val IMAGE_SELECTION = 3;
         const val MY_PERMISSIONS_LOCATION = 4
-        private const val FIVE_MINS = 5 * 60 * 1000.toLong()
-        // CITATION: Lab4
+        private const val THREE_MINS = 3 * 60 * 1000.toLong()
+
+        // CITATION: Lab4 modified
         private fun dateString(year: Int, monthOfYear: Int, dayOfMonth: Int): String {
             var month = monthOfYear
 
-            // Increment monthOfYear for Calendar/Date -> Time Format setting
             month++
             var mon = "" + month
             var day = "" + dayOfMonth

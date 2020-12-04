@@ -141,7 +141,7 @@
     </TextView>
 
     <Button
-        android:id="@+id/date_picker_button"
+        android:id="@+id/expirationDateButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -155,7 +155,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:layout_centerInParent="true"
-        android:layout_below="@id/date_picker_button"
+        android:layout_below="@id/expirationDateButton"
         android:text="Add Listing!" />
 
     <!-- Component Citation: https://material.io/develop/android/components/bottom-navigation -->

@@ -32,20 +32,22 @@ import kotlin.collections.ArrayList
 
 class FeedActivity : AppCompatActivity() {
 
-    lateinit var mNavBar: BottomNavigationView
-    private lateinit var databaseListings: DatabaseReference
-    private lateinit var storageListings: StorageReference
+    // Feed variables
     lateinit var listingsRecyclerView: RecyclerView
     lateinit var distancesSpinner: Spinner
     lateinit var listings: MutableList<ApparelItem>
 
-    // Location Variables
+    // Location variables
     var mDistance: Float = 5f
     private lateinit var locationManager: LocationManager
     private lateinit var mLocationListener: LocationListener
     private var mLastLocationReading: Location? = null
     private val mMinTime: Long = 5000
     private val mMinDistance = 1000.0f
+
+    // Firebase variables
+    private lateinit var databaseListings: DatabaseReference
+    private lateinit var storageListings: StorageReference
 
     // CITATION: based upon Lab7
     var databaseRefreshListingsListener: ValueEventListener = object : ValueEventListener {
@@ -60,6 +62,7 @@ class FeedActivity : AppCompatActivity() {
                     Log.e(TAG, e.toString())
                     return
                 } finally {
+                    // Ensure that the item is within the specified number of miles
                     var itemLat = item!!.itemLatitude as Double
                     var itemLong = item.itemLongitude as Double
                     var diff = FloatArray(1)
@@ -70,17 +73,15 @@ class FeedActivity : AppCompatActivity() {
                         mLastLocationReading!!.longitude,
                         diff
                     )
-
                     var dist = diff[0] * 0.000621371192;
 
-
+                    // Ensure that the item has not expired
                     val c = Calendar.getInstance()
                     var today = dateString(
                         c.get(Calendar.YEAR), c.get(Calendar.MONTH),
                         c.get(Calendar.DAY_OF_MONTH)
                     )
                     var listingExpirationDate = item.listingExpirationDate
-                    // Ensure that the specified expiration date has not already expired
                     val sdf = SimpleDateFormat("yyyy-MM-dd")
                     val expirationDate: Date = sdf.parse(listingExpirationDate)
                     val todayDate: Date = sdf.parse(today)
@@ -91,6 +92,7 @@ class FeedActivity : AppCompatActivity() {
                 }
             }
 
+            // Add the listings to the RecyclerView
             listingsRecyclerView.adapter = ItemRecyclerViewAdapter(
                 this@FeedActivity,
                 listings,
@@ -106,17 +108,21 @@ class FeedActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_feed)
 
+        // Setting up Firebase resources
         databaseListings = FirebaseDatabase.getInstance().getReference("listings")
         storageListings = FirebaseStorage.getInstance().getReference("listings")
 
+        // Setting up Location resources
         mLocationListener = makeLocationListener()
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
+        // Setting up feed resources
         listings = ArrayList()
         listingsRecyclerView = findViewById<View>(R.id.feed) as RecyclerView
         listingsRecyclerView.layoutManager = LinearLayoutManager(this)
+        distancesSpinner = findViewById<View>(R.id.distances_spinner) as Spinner
 
-
+        // Sets up a divider between each item in the recycler view
         var dividerItemDecoration = DividerItemDecoration(
             applicationContext,
             LinearLayoutManager.VERTICAL
@@ -126,32 +132,32 @@ class FeedActivity : AppCompatActivity() {
         )
         listingsRecyclerView.addItemDecoration(dividerItemDecoration)
 
-        distancesSpinner = findViewById<View>(R.id.distances_spinner) as Spinner
-
-        // Create an ArrayAdapter using the string array and a default spinner layout
+        // CITATION: https://developer.android.com/guide/topics/ui/controls/spinner
+        // Set up the Spinner for distance selection
         ArrayAdapter.createFromResource(
             this,
             R.array.distances_array,
             android.R.layout.simple_spinner_item
         ).also { adapter ->
-            // Specify the layout to use when the list of choices appears
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            // Apply the adapter to the spinner
             distancesSpinner.adapter = adapter
         }
 
-        distancesSpinner.setOnItemSelectedListener(object : OnItemSelectedListener {
+        distancesSpinner.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>, view: View?, pos: Int, id: Long
             ) {
+                // Store the distance selected by the user to filter locations using
                 mDistance = parent.getItemAtPosition(pos).toString().split(" ")[0].toFloat()
+                // Refresh the listings
                 databaseListings.addListenerForSingleValueEvent(databaseRefreshListingsListener)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
-        })
+        }
 
-        mNavBar = findViewById<View>(R.id.bottom_navigation) as BottomNavigationView
+        // Sets up the bottom navbar
+        var mNavBar = findViewById<View>(R.id.bottom_navigation) as BottomNavigationView
         mNavBar.setOnNavigationItemSelectedListener { item ->
             when(item.itemId) {
                 R.id.browse -> {
@@ -176,10 +182,12 @@ class FeedActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
+        // Refresh the listings
         databaseListings.addValueEventListener(databaseRefreshListingsListener)
     }
 
     // CITATION: Lab11
+    // Ensures that location permissions have been properly granted
     override fun onResume() {
         super.onResume()
         if (Build.VERSION.SDK_INT >= 23 &&
@@ -202,15 +210,16 @@ class FeedActivity : AppCompatActivity() {
     }
 
     // CITATION: Lab11
+    // Gets the last known location for the user if the prior known location is older than 3 minutes
     private fun getLocationUpdates(){
         try {
             var loc = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if (loc != null && (System.currentTimeMillis() - loc.time) < FIVE_MINS) {
+            if (loc != null && (System.currentTimeMillis() - loc.time) < THREE_MINS) {
                 mLastLocationReading = loc;
             }
 
             loc = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (loc != null && (System.currentTimeMillis() - loc.time) < FIVE_MINS) {
+            if (loc != null && (System.currentTimeMillis() - loc.time) < THREE_MINS) {
                 mLastLocationReading = loc;
             }
 
@@ -239,6 +248,7 @@ class FeedActivity : AppCompatActivity() {
         }
     }
 
+    // Makes a location listener used by the location manager to set the last known location
     private fun makeLocationListener(): LocationListener {
         return object : LocationListener {
             // CITATION: Lab11
@@ -260,6 +270,7 @@ class FeedActivity : AppCompatActivity() {
     }
 
     // CITATION: Lab11
+    // Ensures that permissions have been properly granted for Location services
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>, grantResults: IntArray
@@ -282,13 +293,12 @@ class FeedActivity : AppCompatActivity() {
     companion object {
         private val TAG = "LocalApparel-FeedActivity"
         const val MY_PERMISSIONS_LOCATION = 4
-        val ONE_DAY = 86400000
-        private const val FIVE_MINS = 5 * 60 * 1000.toLong()
-        // CITATION: Lab4
+        private const val THREE_MINS = 3 * 60 * 1000.toLong()
+
+        // CITATION: Lab4 modified
         private fun dateString(year: Int, monthOfYear: Int, dayOfMonth: Int): String {
             var month = monthOfYear
 
-            // Increment monthOfYear for Calendar/Date -> Time Format setting
             month++
             var mon = "" + month
             var day = "" + dayOfMonth
