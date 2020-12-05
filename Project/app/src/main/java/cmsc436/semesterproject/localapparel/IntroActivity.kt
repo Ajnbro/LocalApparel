@@ -7,6 +7,8 @@ import com.github.paolorotolo.appintro.AppIntro2
 import com.github.paolorotolo.appintro.AppIntro2Fragment
 import com.github.paolorotolo.appintro.model.SliderPagerBuilder
 
+// CITATION: Done with the help of https://medium.com/@mxcsyounes/the-easiest-way-to-build-intro-sliders-in-android-in-3-steps-3d6c952153e8
+// CITATION: Component from https://github.com/AppIntro/AppIntro
 class IntroActivity: AppIntro2() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -14,7 +14,6 @@ import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import java.io.ByteArrayOutputStream
 import java.text.DecimalFormat
 
 // CITATION: Based upon UIRecyclerView example
@@ -41,6 +40,7 @@ internal class ItemRecyclerViewAdapter(
         // formatter for prices
         val decim = DecimalFormat("0.00")
         // Set the price of the item for the viewHolder
+
         viewHolder.itemPrice.text = "$" + decim.format(item!!.itemPrice)
 
         // Sets the visibility of " hourly rate"

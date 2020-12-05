@@ -1,5 +1,6 @@
 package cmsc436.semesterproject.localapparel
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -29,6 +30,7 @@ class YourListingsActivity : AppCompatActivity(){
 
     // CITATION: based upon Lab7
     var databaseRefreshListingsListener: ValueEventListener = object : ValueEventListener {
+        @SuppressLint("SimpleDateFormat")
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             listings.clear()
 
@@ -46,15 +48,15 @@ class YourListingsActivity : AppCompatActivity(){
                         c.get(Calendar.YEAR), c.get(Calendar.MONTH),
                         c.get(Calendar.DAY_OF_MONTH)
                     )
-                    var listingExpirationDate = item!!.listingExpirationDate
+                    var listingExpirationDate = item!!.listingExpirationDate.toString()
                     val sdf = SimpleDateFormat("yyyy-MM-dd")
-                    val expirationDate: Date = sdf.parse(listingExpirationDate)
-                    val todayDate: Date = sdf.parse(today)
+                    val expirationDate: Date = sdf.parse(listingExpirationDate) as Date
+                    val todayDate: Date = sdf.parse(today) as Date
                     val currentFirebaseUser: FirebaseUser? =
                         FirebaseAuth.getInstance().currentUser
 
-                    if (item!!.userID == currentFirebaseUser?.uid &&!todayDate.after(expirationDate)) {
-                        listings.add(item!!)
+                    if (item.userID == currentFirebaseUser?.uid &&!todayDate.after(expirationDate)) {
+                        listings.add(item)
                     }
                 }
             }
@@ -69,7 +71,6 @@ class YourListingsActivity : AppCompatActivity(){
 
         override fun onCancelled(databaseError: DatabaseError) {}
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -127,7 +128,7 @@ class YourListingsActivity : AppCompatActivity(){
     }
 
     companion object {
-        private val TAG = "LocalApparel-FeedActivity"
+        private val TAG = "LocalApparel-YourListingsActivity"
 
         // CITATION: Lab4 modified
         private fun dateString(year: Int, monthOfYear: Int, dayOfMonth: Int): String {

@@ -1,5 +1,6 @@
 package cmsc436.semesterproject.localapparel
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -52,6 +53,7 @@ class FeedActivity : AppCompatActivity() {
 
     // CITATION: based upon Lab7
     var databaseRefreshListingsListener: ValueEventListener = object : ValueEventListener {
+        @SuppressLint("SimpleDateFormat")
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             listings.clear()
 
@@ -82,14 +84,14 @@ class FeedActivity : AppCompatActivity() {
                         c.get(Calendar.YEAR), c.get(Calendar.MONTH),
                         c.get(Calendar.DAY_OF_MONTH)
                     )
-                    var listingExpirationDate = item.listingExpirationDate
+                    var listingExpirationDate = item.listingExpirationDate.toString()
                     val sdf = SimpleDateFormat("yyyy-MM-dd")
-                    val expirationDate: Date = sdf.parse(listingExpirationDate)
-                    val todayDate: Date = sdf.parse(today)
+                    val expirationDate: Date = sdf.parse(listingExpirationDate) as Date
+                    val todayDate: Date = sdf.parse(today) as Date
                     val currentFirebaseUser: FirebaseUser? =
                         FirebaseAuth.getInstance().currentUser
-                    if (item!!.userID != currentFirebaseUser?.uid && (dist <= mDistance) && !todayDate.after(expirationDate)) {
-                        listings.add(item!!)
+                    if (item.userID != currentFirebaseUser?.uid && (dist <= mDistance) && !todayDate.after(expirationDate)) {
+                        listings.add(item)
                     }
                 }
             }
@@ -216,19 +218,19 @@ class FeedActivity : AppCompatActivity() {
     // Gets the last known location for the user if the prior known location is older than 3 minutes
     private fun getLocationUpdates(){
         try {
-            var loc = locationManager!!.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            var loc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (loc != null && (System.currentTimeMillis() - loc.time) < THREE_MINS) {
                 mLastLocationReading = loc;
             }
 
-            loc = locationManager!!.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (loc != null && (System.currentTimeMillis() - loc.time) < THREE_MINS) {
                 mLastLocationReading = loc;
             }
 
-            if (null != locationManager!!.getProvider(LocationManager.NETWORK_PROVIDER)) {
+            if (null != locationManager.getProvider(LocationManager.NETWORK_PROVIDER)) {
                 Log.i(TAG, "Network location updates requested")
-                locationManager!!.requestLocationUpdates(
+                locationManager.requestLocationUpdates(
                     LocationManager.NETWORK_PROVIDER,
                     mMinTime,
                     mMinDistance,
@@ -236,9 +238,9 @@ class FeedActivity : AppCompatActivity() {
                 )
             }
 
-            if (null != locationManager!!.getProvider(LocationManager.GPS_PROVIDER)) {
+            if (null != locationManager.getProvider(LocationManager.GPS_PROVIDER)) {
                 Log.i(TAG, "GPS location updates requested")
-                locationManager!!.requestLocationUpdates(
+                locationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
                     mMinTime,
                     mMinDistance,
@@ -247,7 +249,7 @@ class FeedActivity : AppCompatActivity() {
             }
 
         } catch (e: SecurityException) {
-            Log.d(TAG, e.localizedMessage)
+            Log.d(TAG, e.toString())
         }
     }
 

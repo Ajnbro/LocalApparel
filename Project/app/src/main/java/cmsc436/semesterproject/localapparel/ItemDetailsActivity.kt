@@ -137,7 +137,7 @@ class ItemDetailsActivity : Activity() {
             removeItem()
             Toast.makeText(
                 applicationContext,
-                "Congrats on selling your item!",
+                "Congratulations on selling your item!",
                 Toast.LENGTH_LONG
             ).show()
             finish()
