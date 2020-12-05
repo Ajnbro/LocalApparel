@@ -9,12 +9,12 @@ import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.CheckBox
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -34,6 +34,8 @@ class ItemDetailsActivity : Activity() {
     lateinit var mExpiration: TextView
     lateinit var mLocation: TextView
     lateinit var mUserEmail: TextView
+    lateinit var mSoldButton: Button
+    lateinit var mDeleteButton: Button
 
     // Firebase variables
     private lateinit var databaseListings: DatabaseReference
@@ -50,6 +52,13 @@ class ItemDetailsActivity : Activity() {
                     return
                 } finally {
                     if (item!!.itemID == itemID) {
+                        val currentFirebaseUser: FirebaseUser? =
+                            FirebaseAuth.getInstance().currentUser
+
+                        if (item!!.userID == currentFirebaseUser?.uid) {
+                            mSoldButton.visibility = View.VISIBLE;
+                            mDeleteButton.visibility = View.VISIBLE;
+                        }
                         // Sets the item name
                         mName.text = item.itemName
 
@@ -121,6 +130,27 @@ class ItemDetailsActivity : Activity() {
         mExpiration = findViewById<View>(R.id.itemExpirationDate) as TextView
         mLocation = findViewById<View>(R.id.itemLocation) as TextView
         mUserEmail = findViewById<View>(R.id.userEmail) as TextView
+        mSoldButton = findViewById<View>(R.id.soldButton) as Button
+        mDeleteButton = findViewById<View>(R.id.deleteButton) as Button
+
+        mSoldButton.setOnClickListener {
+            removeItem()
+            Toast.makeText(
+                applicationContext,
+                "Congrats on selling your item!",
+                Toast.LENGTH_LONG
+            ).show()
+            finish()
+        }
+        mDeleteButton.setOnClickListener {
+            removeItem()
+            Toast.makeText(
+                applicationContext,
+                "Listing successfully deleted!",
+                Toast.LENGTH_LONG
+            ).show()
+            finish()
+        }
 
         // Sets up Firebase variables
         databaseListings = FirebaseDatabase.getInstance().getReference("listings")
@@ -143,13 +173,21 @@ class ItemDetailsActivity : Activity() {
                     true
                 }
                 R.id.listings -> {
-                    // Respond to navigation item 3 click
+                    val intent = Intent(this, YourListingsActivity::class.java)
+                    startActivity(intent)
                     true
                 }
                 else -> false
             }
         }
     }
+
+    // Removes Item Listing
+    private fun removeItem() {
+        databaseListings.child(itemID!!).removeValue()
+
+    }
+
 
     companion object {
         private val TAG = "LocalApparel-ItemDetailsActivity"

@@ -29,6 +29,7 @@
         <activity android:name="cmsc436.semesterproject.localapparel.LoginActivity" />
         <activity android:name="cmsc436.semesterproject.localapparel.RegistrationActivity" />
         <activity android:name="cmsc436.semesterproject.localapparel.FeedActivity" />
+        <activity android:name="cmsc436.semesterproject.localapparel.YourListingsActivity" />
         <activity android:name="cmsc436.semesterproject.localapparel.AddItemActivity" />
         <activity android:name="cmsc436.semesterproject.localapparel.ItemDetailsActivity" />
     </application>

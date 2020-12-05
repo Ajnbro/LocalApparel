@@ -138,6 +138,29 @@
         android:layout_below="@id/sellerContactInfo">
     </TextView>
 
+    <Button
+        android:id="@+id/soldButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="50dp"
+        android:visibility="invisible"
+        android:layout_below="@+id/userEmail"
+        android:text="Mark as Sold"></Button>
+
+    <Button
+        android:id="@+id/deleteButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:textColor="@color/colorBlack"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="50dp"
+        android:visibility="invisible"
+        android:layout_below="@id/userEmail"
+        android:text="Delete Listing"></Button>
+
     <!-- Component Citation: https://material.io/develop/android/components/bottom-navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"

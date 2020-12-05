@@ -123,7 +123,8 @@ class AddItemActivity : Activity() {
                     true
                 }
                 R.id.listings -> {
-                    // Respond to navigation item 3 click
+                    val intent = Intent(this, YourListingsActivity::class.java)
+                    startActivity(intent)
                     true
                 }
                 else -> false

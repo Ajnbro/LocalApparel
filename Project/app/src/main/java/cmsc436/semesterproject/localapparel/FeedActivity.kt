@@ -22,6 +22,8 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -84,8 +86,9 @@ class FeedActivity : AppCompatActivity() {
                     val sdf = SimpleDateFormat("yyyy-MM-dd")
                     val expirationDate: Date = sdf.parse(listingExpirationDate)
                     val todayDate: Date = sdf.parse(today)
-
-                    if ((dist <= mDistance) && !todayDate.after(expirationDate)) {
+                    val currentFirebaseUser: FirebaseUser? =
+                        FirebaseAuth.getInstance().currentUser
+                    if (item!!.userID != currentFirebaseUser?.uid && (dist <= mDistance) && !todayDate.after(expirationDate)) {
                         listings.add(item!!)
                     }
                 }
@@ -170,7 +173,8 @@ class FeedActivity : AppCompatActivity() {
                     true
                 }
                 R.id.listings -> {
-                    // Respond to navigation item 3 click
+                    val intent = Intent(this, YourListingsActivity::class.java)
+                    startActivity(intent)
                     true
                 }
                 else -> false
