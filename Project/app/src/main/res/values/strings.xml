@@ -1,3 +1,4 @@
+<!-- CITATION: Some strings from Lab4 and Lab7-->
 <resources>
     <string name="app_name">Local Apparel</string>
     <string name="register_new_account">Register new account</string>
@@ -8,6 +9,7 @@
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="register">Register</string>
+    <string name="passwordInfo">Your password must contain at least one number and one letter, and be between 6 and 32 characters in length.</string>
     <string-array name="distances_array">
         <item>5 miles</item>
         <item>10 miles</item>

@@ -10,33 +10,34 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 
-// CITATION: Lab7
+// CITATION: Lab7 modified
 class LoginActivity : AppCompatActivity() {
-    private var mDatabaseReference: DatabaseReference? = null
-    private var mDatabase: FirebaseDatabase? = null
+
     private var userEmail: EditText? = null
     private var userPassword: EditText? = null
-    private var loginBtn: Button? = null
+    private var loginButton: Button? = null
+    private var forgotPasswordButton: Button? = null
     private var progressBar: ProgressBar? = null
 
     private var mAuth: FirebaseAuth? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
+        setContentView(R.layout.login)
 
-        mDatabase = FirebaseDatabase.getInstance()
-        mDatabaseReference = mDatabase!!.reference.child("Users")
+        // Firebase variables
         mAuth = FirebaseAuth.getInstance()
 
-        userEmail = findViewById(R.id.email)
-        userPassword = findViewById(R.id.password)
-        loginBtn = findViewById(R.id.login)
+        // Login variables
+        userEmail = findViewById(R.id.emailInput)
+        userPassword = findViewById(R.id.passwordInput)
+        loginButton = findViewById(R.id.loginButton)
+        forgotPasswordButton = findViewById(R.id.forgotPasswordButton)
         progressBar = findViewById(R.id.progressBar)
 
-        loginBtn!!.setOnClickListener { loginUserAccount() }
+        loginButton!!.setOnClickListener { loginUserAccount() }
+
+        forgotPasswordButton!!.setOnClickListener { forgotPassword() }
     }
 
     private fun loginUserAccount() {
@@ -46,11 +47,11 @@ class LoginActivity : AppCompatActivity() {
         val password: String = userPassword?.text.toString()
 
         if (TextUtils.isEmpty(email)) {
-            Toast.makeText(applicationContext, "Please enter email...", Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, "Please enter an email address!", Toast.LENGTH_LONG).show()
             return
         }
         if (TextUtils.isEmpty(password)) {
-            Toast.makeText(applicationContext, "Please enter password!", Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, "Please enter your password!", Toast.LENGTH_LONG).show()
             return
         }
 
@@ -65,7 +66,29 @@ class LoginActivity : AppCompatActivity() {
                 } else {
                     Toast.makeText(
                         applicationContext,
-                        "Login failed! Please try again later",
+                        "Login failed!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+    }
+
+    private fun forgotPassword() {
+        val email: String = userEmail?.text.toString()
+        userPassword!!.setText("")
+
+        // Docs citation: https://firebase.google.com/docs/auth/android/manage-users#kotlin+ktx_8
+        mAuth!!.sendPasswordResetEmail(email).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(
+                        applicationContext,
+                        "A password reset email has been sent to $email!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    Toast.makeText(
+                        applicationContext,
+                        "An account with the email $email does not exist!",
                         Toast.LENGTH_LONG
                     ).show()
                 }

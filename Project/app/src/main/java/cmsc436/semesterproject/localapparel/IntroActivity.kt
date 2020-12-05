@@ -12,7 +12,6 @@ class IntroActivity: AppIntro2() {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
         showIntroSlides()
-
     }
 
     private fun showIntroSlides() {
@@ -40,7 +39,7 @@ class IntroActivity: AppIntro2() {
         val intro4 = SliderPagerBuilder()
             .title(getString(R.string.intro_slide4_title))
             .description(getString(R.string.intro_slide4_desc))
-            .imageDrawable(R.drawable.shirt)
+            .imageDrawable(R.drawable.logo)
             .bgColor(getColor(R.color.introSlide4))
             .build()
 
@@ -48,7 +47,6 @@ class IntroActivity: AppIntro2() {
         addSlide(AppIntro2Fragment.newInstance(intro2))
         addSlide(AppIntro2Fragment.newInstance(intro3))
         addSlide(AppIntro2Fragment.newInstance(intro4))
-
 
         showStatusBar(false)
 
@@ -67,9 +65,5 @@ class IntroActivity: AppIntro2() {
     override fun onDonePressed(currentFragment: Fragment?) {
         super.onDonePressed(currentFragment)
         goToMain()
-    }
-
-    override fun onSlideChanged(oldFragment: Fragment?, newFragment: Fragment?) {
-        super.onSlideChanged(oldFragment, newFragment)
     }
 }

@@ -13,44 +13,48 @@ import com.google.firebase.auth.FirebaseAuth
 // CITATION: Lab7 modified
 class RegistrationActivity : AppCompatActivity() {
 
-    private var emailTV: EditText? = null
-    private var passwordTV: EditText? = null
-    private var regBtn: Button? = null
+    // Registration variables
+    private var emailInput: EditText? = null
+    private var passwordInput: EditText? = null
+    private var registrationButton: Button? = null
     private var progressBar: ProgressBar? = null
     private var validator = Validators()
 
+    // Firebase variables
     private var mAuth: FirebaseAuth? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_registration)
+        setContentView(R.layout.registration)
 
         mAuth = FirebaseAuth.getInstance()
 
-        emailTV = findViewById(R.id.email)
-        passwordTV = findViewById(R.id.password)
-        regBtn = findViewById(R.id.register)
+        emailInput = findViewById(R.id.emailInput)
+        passwordInput = findViewById(R.id.passwordInput)
+        registrationButton = findViewById(R.id.registrationButton)
         progressBar = findViewById(R.id.progressBar)
 
-        regBtn!!.setOnClickListener { registerNewUser() }
+        registrationButton!!.setOnClickListener { registerNewUser() }
     }
 
     private fun registerNewUser() {
         progressBar!!.visibility = View.VISIBLE
 
-        val email: String = emailTV!!.text.toString()
-        val password: String = passwordTV!!.text.toString()
+        val email: String = emailInput!!.text.toString()
+        val password: String = passwordInput!!.text.toString()
 
         if (!validator.validEmail(email)) {
-            Toast.makeText(applicationContext, "Please enter a valid email...", Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, "The specified email address is not valid!", Toast.LENGTH_LONG).show()
             progressBar!!.visibility = View.GONE
             return
         }
         if (!validator.validPassword(password)) {
-            Toast.makeText(applicationContext, "Please enter a valid password!", Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, "The specified password is not valid! A password must be between 6 and 32 characters. It must also contain at least one number and one letter!", Toast.LENGTH_LONG).show()
             progressBar!!.visibility = View.GONE
             return
         }
 
+        // Add the new account credentials to Firebase
         mAuth!!.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
@@ -60,7 +64,7 @@ class RegistrationActivity : AppCompatActivity() {
                         val intent = Intent(this@RegistrationActivity, MainActivity::class.java)
                         startActivity(intent)
                     } else {
-                        Toast.makeText(applicationContext, "Registration failed! Please try again later", Toast.LENGTH_LONG).show()
+                        Toast.makeText(applicationContext, "Registration failed! Please try again", Toast.LENGTH_LONG).show()
                         progressBar!!.visibility = View.GONE
                     }
                 }

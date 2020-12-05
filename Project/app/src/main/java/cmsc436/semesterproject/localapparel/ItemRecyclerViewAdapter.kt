@@ -17,7 +17,7 @@ import com.google.firebase.storage.StorageReference
 import java.io.ByteArrayOutputStream
 import java.text.DecimalFormat
 
-// CITATION: Based upon UIRecyclerView
+// CITATION: Based upon UIRecyclerView example
 internal class ItemRecyclerViewAdapter(
     private val context: Activity,
     private val mItems: MutableList<ApparelItem>,

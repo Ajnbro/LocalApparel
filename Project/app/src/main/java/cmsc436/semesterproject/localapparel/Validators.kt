@@ -1,6 +1,6 @@
 package cmsc436.semesterproject.localapparel
 
-// CITATION: Lab7
+// CITATION: Lab7 modified
 class Validators {
     fun validEmail(email: String?) : Boolean {
         if (email.isNullOrEmpty()) {
@@ -23,11 +23,12 @@ class Validators {
             return false
         }
 
-        val charRegex = Regex(".*[a-zA-Z].*")
-
-        if (password.length in 4..8 && password.matches(charRegex)) {
-                return true
+        val charRegex = Regex(".*([a-zA-Z][0-9]|[a-zA-Z][0-9])|.*")
+        // The password must be between 6 and 32 characters and must contain at least 1 number and 1 letter
+        if (password.length in 6..32 && password.matches(charRegex)) {
+            return true
         }
+
         return false
     }
 }

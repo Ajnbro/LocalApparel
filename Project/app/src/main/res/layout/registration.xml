@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- CITATION: Lab7 -->
+<!-- CITATION: Lab7 modified -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    android:padding="16dp"
-    tools:context="cmsc436.semesterproject.localapparel.LoginActivity">
+    android:padding="12dp"
+    tools:context="cmsc436.semesterproject.localapparel.RegistrationActivity">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/account_login"/>
+        android:text="@string/register_new_account" />
 
     <EditText
-        android:id="@+id/email"
+        android:id="@+id/emailInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/email"
@@ -23,18 +23,32 @@
         android:importantForAutofill="no" />
 
     <EditText
-        android:id="@+id/password"
+        android:id="@+id/passwordInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/password"
         android:inputType="textPassword"
         android:importantForAutofill="no" />
 
-    <Button
-        android:id="@+id/login"
+    <ImageView
+        android:id="@+id/infoSymbol"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/login" />
+        android:src="@drawable/info"/>
+
+    <TextView
+        android:id="@+id/passwordInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/info"
+        android:text="@string/passwordInfo"
+        android:layout_toRightOf="@id/infoSymbol"/>
+
+    <Button
+        android:id="@+id/registrationButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/register" />
 
     <ProgressBar
         android:id="@+id/progressBar"
