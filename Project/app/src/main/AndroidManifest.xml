@@ -18,14 +18,13 @@
         android:screenOrientation="portrait"
         tools:ignore="AllowBackup">
 
-        <activity android:name="cmsc436.semesterproject.localapparel.IntroActivity">
+        <activity android:name="cmsc436.semesterproject.localapparel.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="cmsc436.semesterproject.localapparel.MainActivity" />
         <activity android:name="cmsc436.semesterproject.localapparel.LoginActivity" />
         <activity android:name="cmsc436.semesterproject.localapparel.RegistrationActivity" />
         <activity android:name="cmsc436.semesterproject.localapparel.FeedActivity" />
