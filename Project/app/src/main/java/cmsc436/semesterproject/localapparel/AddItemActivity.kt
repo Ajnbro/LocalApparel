@@ -446,7 +446,7 @@ class AddItemActivity : Activity() {
     companion object {
         private val TAG = "LocalApparel-AddItemActivity"
 
-        // CITATION: Lab11
+        // CITATION: Lab11 modified
         const val IMAGE_SELECTION = 3;
         const val MY_PERMISSIONS_LOCATION = 4
         private const val THREE_MINS = 3 * 60 * 1000.toLong()
